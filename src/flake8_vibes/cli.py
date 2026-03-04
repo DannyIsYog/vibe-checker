@@ -21,9 +21,10 @@ def check_file(filepath: Path) -> list[VibError]:
         tree = ast.parse(source, filename=str(filepath))
     except SyntaxError:
         return []
+    lines = source.splitlines()
     errors: list[VibError] = []
     for rule_class in ALL_RULES:
-        errors.extend(rule_class().check(tree, str(filepath)))
+        errors.extend(rule_class().check(tree, str(filepath), lines))
     return errors
 
 

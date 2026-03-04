@@ -8,5 +8,10 @@ VibError = tuple[int, int, str, type]
 class VibRule:
     code: str
 
-    def check(self, tree: ast.AST, filename: str = "<unknown>") -> list[VibError]:
+    def check(
+        self,
+        tree: ast.AST,
+        filename: str = "<unknown>",
+        lines: list[str] | None = None,
+    ) -> list[VibError]:
         raise NotImplementedError

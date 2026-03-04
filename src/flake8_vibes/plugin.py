@@ -11,10 +11,16 @@ class VibesPlugin:
     name = "flake8-vibes"
     version = __version__
 
-    def __init__(self, tree: ast.AST, filename: str = "<unknown>") -> None:
+    def __init__(
+        self,
+        tree: ast.AST,
+        filename: str = "<unknown>",
+        lines: list[str] | None = None,
+    ) -> None:
         self._tree = tree
         self._filename = filename
+        self._lines = lines
 
     def run(self) -> Generator[VibError, None, None]:
         for rule_class in ALL_RULES:
-            yield from rule_class().check(self._tree, self._filename)
+            yield from rule_class().check(self._tree, self._filename, self._lines)

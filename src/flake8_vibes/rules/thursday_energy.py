@@ -22,7 +22,12 @@ def _count_lines(node: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
 class ThursdayEnergyRule(VibRule):
     code = "VIB001"
 
-    def check(self, tree: ast.AST, filename: str = "<unknown>") -> list[VibError]:
+    def check(
+        self,
+        tree: ast.AST,
+        filename: str = "<unknown>",
+        lines: list[str] | None = None,
+    ) -> list[VibError]:
         errors: list[VibError] = []
         thursday = _is_thursday(filename)
         if not thursday:
