@@ -1,4 +1,4 @@
 {
   "flake8.interpreter": ["/opt/homebrew/bin/python3"],
-  "flake8.args": ["--select=E,F,W,VIB"]
+  "flake8.args": ["--select=VIB"]
 }
