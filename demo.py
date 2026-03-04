@@ -60,3 +60,26 @@ async def another_long_function():
 # TODO: refactor this someday
 # FIXME: this is broken but it's Wednesday so whatever
 x = 42
+
+
+# --- boolean chaos showcase ---
+
+def check_status(is_active, value, result, user):
+    # VIB081: comparing to True explicitly
+    if is_active == True:
+        print("active")
+
+    # VIB082: comparing to False instead of using not
+    if is_active == False:
+        print("not active")
+
+    # VIB083: using == None instead of is None
+    if user == None:
+        print("no user")
+
+    if None == value:
+        print("also no value")
+
+    # VIB084: not x == y instead of x != y
+    if not result == 42:
+        print("wrong answer")

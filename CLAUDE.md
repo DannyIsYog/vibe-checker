@@ -15,3 +15,15 @@ Bad examples:
 # Rules must have randomized messages
 
 Every rule must define at least 2 messages and pick between them using `random.choice(messages)`.
+
+# Rule messages should be educational when possible
+
+Messages should call out the problem *and* tell the user what to do instead. Lead with the shame, end with the fix. The tone should feel like a senior dev who's seen this before — direct, a little judgy, but ultimately trying to help.
+
+Good examples:
+- `"`== True` is a tautology wrapped in anxiety. the fix is `if x:` — Python evaluates booleans natively."`
+- `"None is a singleton. you don't compare singletons with `==`. use `is None` — it checks identity, not equality."`
+
+Bad examples:
+- `"comparing to True is bad"` — no fix, no reason
+- `"use is None"` — no personality, no context
