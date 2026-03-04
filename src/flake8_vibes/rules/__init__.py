@@ -19,4 +19,9 @@ ALL_RULES: list[type[VibRule]] = [
     NotEqualsRule,
 ]
 
+_codes = [r.code for r in ALL_RULES]
+_dupes = {c for c in _codes if _codes.count(c) > 1}
+if _dupes:
+    raise RuntimeError(f"duplicate rule codes: {_dupes}")
+
 __all__ = ["ALL_RULES", "VibError", "VibRule"]

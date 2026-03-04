@@ -5,6 +5,7 @@ import ast
 import pytest
 
 from flake8_vibes.plugin import VibesPlugin
+from flake8_vibes.rules import ALL_RULES
 from flake8_vibes.rules.base import VibRule
 
 
@@ -37,6 +38,11 @@ def test_plugin_run_output_format(monkeypatch: pytest.MonkeyPatch):
     assert isinstance(msg, str)
     assert "VIB001" in msg
     assert isinstance(typ, type)
+
+
+def test_no_duplicate_rule_codes():
+    codes = [r.code for r in ALL_RULES]
+    assert len(codes) == len(set(codes)), f"duplicate codes: {set(c for c in codes if codes.count(c) > 1)}"
 
 
 def test_vib_rule_base_raises():
