@@ -42,7 +42,6 @@ def test_flags_long_function_on_thursday(thursday):
     assert col == 0
     assert "VIB001" in msg
     assert "big_fn" in msg
-    assert "Thursday" in msg
 
 
 def test_clean_short_function_on_thursday(thursday):

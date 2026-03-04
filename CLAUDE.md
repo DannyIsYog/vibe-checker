@@ -11,3 +11,7 @@ Bad examples:
 - `add todo shame rule`
 - `fix bug`
 - `update files`
+
+# Rules must have randomized messages
+
+Every rule must define at least 2 messages and pick between them using `random.choice(messages)`.

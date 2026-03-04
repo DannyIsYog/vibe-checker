@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import ast
 
-from flake8_vibes.rules.todo_shame import TodoShameRule
+from flake8_vibes.rules.todo_shame import TodoShameRule, _MESSAGES
 
 
 def check(source: str) -> list:
@@ -15,13 +15,17 @@ def test_flags_todo():
     errors = check("x = 1  # TODO: fix this\n")
     assert len(errors) == 1
     assert "VIB002" in errors[0][2]
-    assert "TODO" in errors[0][2]
 
 
 def test_flags_fixme():
     errors = check("x = 1  # FIXME: broken\n")
     assert len(errors) == 1
-    assert "FIXME" in errors[0][2]
+    assert "VIB002" in errors[0][2]
+
+
+def test_all_todo_messages_covered():
+    assert len(_MESSAGES["TODO"]) >= 2
+    assert len(_MESSAGES["FIXME"]) >= 2
 
 
 def test_case_insensitive():
