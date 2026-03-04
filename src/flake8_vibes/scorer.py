@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 from dataclasses import dataclass, field
 
 
@@ -20,12 +21,12 @@ class VibeReport:
     def verdict(self) -> str:
         s = self.score
         if s >= 90:
-            return "immaculate"
+            return random.choice(["she ate and left no crumbs", "slaying", "immaculate", "serving"])
         elif s >= 70:
-            return "decent energy"
+            return random.choice(["decent energy", "not bad not great", "it's giving something"])
         elif s >= 50:
-            return "concerning"
+            return random.choice(["concerning", "the vibes are questionable", "we need to talk"])
         elif s >= 25:
-            return "chaotic"
+            return random.choice(["chaotic", "this is a cry for help", "bestie no"])
         else:
-            return "cooked"
+            return random.choice(["cooked", "it's giving dumpster fire", "expired"])

@@ -4,6 +4,12 @@ import pytest
 
 from flake8_vibes.scorer import VibeReport
 
+TIER_90 = {"she ate and left no crumbs", "slaying", "immaculate", "serving"}
+TIER_70 = {"decent energy", "not bad not great", "it's giving something"}
+TIER_50 = {"concerning", "the vibes are questionable", "we need to talk"}
+TIER_25 = {"chaotic", "this is a cry for help", "bestie no"}
+TIER_0 = {"cooked", "it's giving dumpster fire", "expired"}
+
 
 def test_score_100_no_violations():
     report = VibeReport(violations_by_rule={}, total_files=5)
@@ -29,23 +35,23 @@ def test_score_multiple_rules():
 
 
 @pytest.mark.parametrize(
-    ("violations", "expected_verdict"),
+    ("violations", "expected_tier"),
     [
-        (0, "immaculate"),
-        (2, "immaculate"),  # score=90
-        (3, "decent energy"),  # score=85... wait: 100-15=85 -> decent energy
-        (6, "decent energy"),  # score=70
-        (7, "concerning"),  # score=65
-        (10, "concerning"),  # score=50
-        (11, "chaotic"),  # score=45
-        (15, "chaotic"),  # score=25
-        (16, "cooked"),  # score=20
-        (100, "cooked"),  # score=0
+        (0, TIER_90),
+        (2, TIER_90),   # score=90
+        (3, TIER_70),   # score=85
+        (6, TIER_70),   # score=70
+        (7, TIER_50),   # score=65
+        (10, TIER_50),  # score=50
+        (11, TIER_25),  # score=45
+        (15, TIER_25),  # score=25
+        (16, TIER_0),   # score=20
+        (100, TIER_0),  # score=0
     ],
 )
-def test_verdict_thresholds(violations: int, expected_verdict: str):
+def test_verdict_thresholds(violations: int, expected_tier: set[str]):
     report = VibeReport(
         violations_by_rule={"VIB001": violations} if violations else {},
         total_files=1,
     )
-    assert report.verdict == expected_verdict
+    assert report.verdict in expected_tier
