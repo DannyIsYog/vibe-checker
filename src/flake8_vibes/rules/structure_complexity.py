@@ -22,12 +22,12 @@ _NESTING_NODES = (
 # ── VIB030 — too-many-args ──────────────────────────────────────────────────
 
 _TOO_MANY_ARGS_MESSAGES = [
-    "'{name}' takes {n} arguments. that's not a function, that's a meeting agenda.",
-    "'{name}' has {n} parameters. if you need that many, you need a dataclass.",
-    "'{name}' accepts {n} arguments. your call sites are suffering in silence.",
-    "'{name}' wants {n} things from you. healthy relationships have limits.",
-    "'{name}' with {n} parameters is a cry for help dressed as an API.",
-    "a function that takes {n} arguments has forgotten what abstraction is for.",
+    "'{name}' takes {n} arguments. that's not a function, that's a hostage situation.",
+    "'{name}' has {n} parameters. a dataclass is literally begging you to use it.",
+    "'{name}' accepts {n} arguments. your call sites are in therapy because of this.",
+    "'{name}' wants {n} things from you. this is not a relationship, this is a form.",
+    "'{name}' with {n} parameters is unwell and needs a refactor, not a hug.",
+    "{n} arguments. i'm not angry. i'm just deeply, deeply disappointed.",
 ]
 
 
@@ -67,12 +67,12 @@ class TooManyArgsRule(VibRule):
 # ── VIB031 — deep-nesting ───────────────────────────────────────────────────
 
 _DEEP_NESTING_MESSAGES = [
-    "indentation level {depth}: you have nested your way into a corner.",
-    "nesting depth {depth} detected. your future self will not forgive this.",
-    "depth {depth}. you can go deeper, but you really, really shouldn't.",
-    "this code is nested {depth} levels deep. extract a function. any function.",
-    "{depth} levels of nesting. the pyramid of doom is not an aspiration.",
-    "nesting depth {depth}: the indentation knows something you won't admit.",
+    "indentation level {depth}: you nested your way into a corner and now you live here.",
+    "depth {depth} detected. your future self is already writing the apology PR.",
+    "depth {depth}. you absolutely can go deeper. please, for the love of all that is holy, don't.",
+    "{depth} levels deep. extract a function. any function. i am begging you.",
+    "{depth} levels of nesting. the pyramid of doom is not an aesthetic.",
+    "nesting depth {depth}: the indentation is screaming what the variable names won't say.",
 ]
 
 
@@ -112,12 +112,12 @@ class DeepNestingRule(VibRule):
 # ── VIB032 — too-many-returns ───────────────────────────────────────────────
 
 _TOO_MANY_RETURNS_MESSAGES = [
-    "'{name}' has {n} return statements. pick an exit and commit to it.",
-    "'{name}' returns {n} ways. a function should have one job and one door.",
-    "{n} return statements in '{name}'. this function has commitment issues.",
-    "'{name}' exits {n} times. every additional return is a missed refactor.",
-    "'{name}' has {n} returns. the control flow is a choose-your-own-adventure.",
-    "returning from '{name}' is a {n}-way tie. there's no winner here.",
+    "'{name}' has {n} return statements. pick an exit and commit. this isn't a buffet.",
+    "'{name}' leaves {n} different ways. a function should have one door, not a fire escape.",
+    "{n} returns in '{name}'. the only thing this function is committed to is leaving.",
+    "'{name}' exits {n} times. each one is a refactor you decided wasn't your problem.",
+    "'{name}' has {n} returns. the control flow is a choose-your-own-adventure and every ending is bad.",
+    "'{name}' — {n} ways out. no clear way in. iconic, but not in a good way.",
 ]
 
 
@@ -156,12 +156,12 @@ class TooManyReturnsRule(VibRule):
 # ── VIB033 — bare-except ────────────────────────────────────────────────────
 
 _BARE_EXCEPT_MESSAGES = [
-    "`except:` catches everything, including bugs you haven't written yet.",
-    "bare `except` is a net cast wide enough to catch your future regrets.",
-    "`except:` without a type is `except: pretend nothing happened`.",
-    "catching every exception is not error handling, it's error avoidance.",
-    "`except:` — the `*` of exception handling, and equally inadvisable.",
-    "a bare `except` catches `KeyboardInterrupt`. think about what you've done.",
+    "`except:` catches everything, including bugs you haven't had the audacity to write yet.",
+    "bare `except` is a net cast wide enough to catch your entire career's worth of regrets.",
+    "`except:` without a type is `except: something went wrong and i don't want to know what`.",
+    "catching every exception is not error handling. it's a cope mechanism with a colon.",
+    "`except:` — the `import *` of error handling. equally chaotic. equally your fault.",
+    "a bare `except` catches `KeyboardInterrupt`. sit with that. really sit with it.",
 ]
 
 
@@ -186,12 +186,12 @@ class BareExceptRule(VibRule):
 # ── VIB034 — empty-except ───────────────────────────────────────────────────
 
 _EMPTY_EXCEPT_MESSAGES = [
-    "catching an exception and doing nothing is not error handling.",
-    "`except: pass` is `I acknowledge this failure and choose to ignore it`.",
-    "an except block with only `pass` is a suppressed scream.",
-    "you caught the exception. now do something about it.",
-    "`except: pass` — the code equivalent of sweeping it under the rug.",
-    "silencing an exception with `pass` is not the same as fixing it.",
+    "catching an exception and doing nothing is not error handling. it's trauma response.",
+    "`except: pass` is `yes i saw it, no i don't care, moving on`.",
+    "an except block with only `pass` is a suppressed scream in production.",
+    "you caught the exception. you looked it in the eyes. you said `pass`. unacceptable.",
+    "`except: pass` — the code equivalent of unplugging the smoke alarm.",
+    "silencing an exception with `pass` is not a fix. it's a time bomb with good posture.",
 ]
 
 

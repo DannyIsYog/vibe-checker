@@ -49,10 +49,10 @@ def _name_words(name: str) -> list[str]:
 _GOD_NAMES = frozenset({"data", "result", "info", "stuff", "thing", "obj"})
 
 _GOD_VARIABLE_MESSAGES = [
-    "`{name}` holds everything and describes nothing.",
-    "you named it `{name}`. that name fits anything.",
-    "`{name}` is a variable that refused to be specific.",
-    "every codebase has a `{name}`. yours doesn't need one.",
+    "`{name}` holds everything and describes absolutely nothing. a true void.",
+    "you named it `{name}`. congratulations, that name fits literally anything.",
+    "`{name}` is a variable that looked specificity in the eye and said no.",
+    "every codebase has a `{name}`. every developer regrets it. yours is no different.",
 ]
 
 
@@ -77,10 +77,10 @@ class GodVariableRule(VibRule):
 # ── VIB014 — single-letter ───────────────────────────────────────────────────
 
 _SINGLE_LETTER_MESSAGES = [
-    "`{name}` outside a loop is a variable with a secret identity.",
-    "single-letter variables outside loops are readability crimes.",
-    "`{name}` is one character and zero context.",
-    "you used `{name}` like everyone knows what it is. outside a loop, they don't.",
+    "`{name}` outside a loop has a secret identity and is refusing to share it.",
+    "single-letter variables outside loops are readability crimes and you are the perpetrator.",
+    "`{name}` is one character, zero context, and infinite future confusion.",
+    "you used `{name}` like it's self-explanatory. outside a loop, nothing is self-explanatory.",
 ]
 
 
@@ -107,10 +107,10 @@ class SingleLetterRule(VibRule):
 # ── VIB015 — temp-variable ───────────────────────────────────────────────────
 
 _PLACEHOLDER_NAME_MESSAGES = [
-    "`{name}` was supposed to be temporary. it wasn't.",
-    "temp variables that outlive their branch are permanent problems.",
-    "`{name}` — the naming equivalent of 'I'll clean this up later'. you won't.",
-    "calling it `{name}` is a promise you made to yourself that you broke.",
+    "`{name}` was supposed to be temporary. it has now outlived the sprint it was born in.",
+    "temp variables that outlive their branch become permanent fixtures of shame.",
+    "`{name}` — the naming equivalent of 'I'll refactor this later'. you won't. we both know it.",
+    "calling it `{name}` is a promise you made to yourself that your git history will never let you forget.",
 ]
 
 
@@ -136,10 +136,10 @@ class TempVariableRule(VibRule):
 # ── VIB016 — new-prefix ──────────────────────────────────────────────────────
 
 _NEW_PREFIX_MESSAGES = [
-    "`{name}` implies there's an `old_` version nearby. there isn't.",
-    "`{name}` — the `new_` prefix means you had an `old_` and didn't clean up.",
-    "`{name}` — temporal naming is not naming.",
-    "`{name}` — if you need `new_` to tell it apart, you have two things and one idea.",
+    "`{name}` implies there's an `old_` version lurking nearby. there is, isn't there.",
+    "`{name}` — the `new_` prefix means you kept the old one and called it a day. shameful.",
+    "`{name}` — `new_` is not a name. it's a timestamp. timestamps are not names.",
+    "`{name}` — if you need `new_` to tell it apart, you have two things, one idea, and a problem.",
 ]
 
 
@@ -164,10 +164,10 @@ class NewPrefixRule(VibRule):
 # ── VIB017 — copy-suffix ─────────────────────────────────────────────────────
 
 _COPY_SUFFIX_MESSAGES = [
-    "`{name}` — version numbers in variable names is what git branches are for.",
-    "you added `_copy` or a number to `{name}` instead of thinking of a better name.",
-    "`{name}` is a variable name that tells you its history, not its purpose.",
-    "suffixing numbers or `_copy` on `{name}` is a naming strategy that fails at scale.",
+    "`{name}` — version numbers in variable names is literally what git was invented to prevent.",
+    "you appended `_copy` to `{name}` instead of thinking harder. git saw. git judged.",
+    "`{name}` tells you its history, not its purpose. those are not the same thing.",
+    "suffixing `_copy` or a number on `{name}` is not a naming strategy. it's a surrender.",
 ]
 
 
@@ -192,10 +192,10 @@ class CopySuffixRule(VibRule):
 # ── VIB018 — final-variable ──────────────────────────────────────────────────
 
 _OVERCONFIDENT_NAME_MESSAGES = [
-    "`{name}` — `final` is not a description, it's a wish. three PRs from now it'll be `final_v2`.",
-    "nothing in code is final. `{name}` will be renamed.",
-    "`{name}` — the hubris of `final` in a variable name.",
-    "every `final_` variable has a sibling named `final_final_`.",
+    "`{name}` — `final` is not a description, it's cope. three PRs from now it'll be `final_v2_REAL`.",
+    "nothing in code is final. `{name}` will be renamed and you will not be ready.",
+    "`{name}` — the audacity of `final` in a variable name. the hubris. the nerve.",
+    "every `final_` variable has a `final_final_` sibling and a `final_actual_` cousin. it's a family.",
 ]
 
 
@@ -220,10 +220,10 @@ class FinalVariableRule(VibRule):
 # ── VIB019 — flag-variable ───────────────────────────────────────────────────
 
 _OPAQUE_BOOL_MESSAGES = [
-    "`{name}` is a boolean that refused to describe itself.",
-    "a variable called `{name}` tells you it's a boolean and nothing else.",
-    "`{name}` is the least informative boolean name available.",
-    "`flag` is not a question. `{name}` is not an answer.",
+    "`{name}` is a boolean that looked at meaning and said 'not my department'.",
+    "a variable called `{name}` tells you it's a boolean and absolutely nothing else. iconic. terrible.",
+    "`{name}` is the least informative boolean name in the entire english language.",
+    "`flag` is not a question, `{name}` is not an answer, and this code is not doing well.",
 ]
 
 
@@ -248,10 +248,10 @@ class FlagVariableRule(VibRule):
 # ── VIB020 — vague-class ─────────────────────────────────────────────────────
 
 _VAGUE_CLASS_MESSAGES = [
-    "`{name}` manages something. the question is what.",
-    "Manager classes are where responsibility goes to hide. `{name}` is no exception.",
-    "`{name}` — every codebase has one, none of them know what it does.",
-    "`{name}` — a class with Manager in the name is a class with identity issues.",
+    "`{name}` manages something. nobody knows what. not even `{name}`.",
+    "Manager classes are where responsibility goes to hide and slowly die. `{name}` is no exception.",
+    "`{name}` — every codebase has one. none of them can explain what it actually does. including yours.",
+    "`{name}` — a class with Manager in the name is a class that has given up on identity.",
 ]
 
 

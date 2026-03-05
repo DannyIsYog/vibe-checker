@@ -35,12 +35,12 @@ def _check_compare_against(
 # ── VIB081 — equals-true ─────────────────────────────────────────────────────
 
 _EQUALS_TRUE_MESSAGES = [
-    "comparing to `True` explicitly is a trust issue with your own type system.",
-    "`== True` — you already have a boolean, what more do you need.",
-    "if it's True it's True. you don't have to check twice.",
-    "`== True` is a tautology wrapped in anxiety.",
-    "your type system knows it's True. why don't you?",
-    "comparing to `True` like you need a second opinion. you don't.",
+    "comparing to `True` explicitly is a trust issue with your own type system and honestly? it shows.",
+    "`== True` — you already have a boolean. what are you waiting for. use it.",
+    "if it's True it's True. asking Python to confirm doesn't make it more True.",
+    "`== True` is a tautology wearing a trench coat. no one is fooled.",
+    "your type system knows it's True. the question is why YOU don't.",
+    "`== True`. the boolean was right there. you walked past it. why.",
 ]
 
 
@@ -61,12 +61,12 @@ class EqualsTrueRule(VibRule):
 # ── VIB082 — equals-false ────────────────────────────────────────────────────
 
 _EQUALS_FALSE_MESSAGES = [
-    "`if not x` was right there and you walked right past it.",
-    "`== False` is just `not` with extra steps and less confidence.",
-    "you compared to `False` like Python doesn't have a `not` keyword. it does.",
-    "`== False` — you're asking Python to confirm what it already knows.",
-    "`if not x` exists. it's been here the whole time.",
-    "this is `not x` in a trench coat.",
+    "`if not x` was RIGHT THERE and you looked it dead in the face and typed `== False` anyway.",
+    "`== False` is just `not` with extra steps, less confidence, and worse vibes.",
+    "Python has a `not` keyword. it's been here since 1991. i'm begging you to use it.",
+    "`== False` — asking Python to confirm what it already knows. exhausting for everyone.",
+    "`if not x` exists. it has always existed. it will outlive us all.",
+    "this is literally just `not x` in a trench coat and the coat isn't even good.",
 ]
 
 
@@ -87,12 +87,12 @@ class EqualsFalseRule(VibRule):
 # ── VIB083 — equals-none ─────────────────────────────────────────────────────
 
 _EQUALS_NONE_MESSAGES = [
-    "`is None` exists for a reason and that reason is you.",
-    "`== None` works until it doesn't.",
-    "None is a singleton. you don't compare singletons with `==`.",
-    "`== None` is technically fine and spiritually wrong.",
-    "`is None` was right there. it's always been right there.",
-    "PEP 8 asked nicely. we're asking less nicely.",
+    "`is None` exists specifically for you and you chose `== None` anyway. rude.",
+    "`== None` works until a `__eq__` override makes it your problem. and it will.",
+    "None is a singleton. you identity-check singletons. this is not a debate.",
+    "`== None` is technically allowed and spiritually a cry for help.",
+    "`is None` has been here the whole time. waiting. patient. judging.",
+    "PEP 8 asked nicely. flake8 asked sternly. we are not asking.",
 ]
 
 
@@ -113,12 +113,12 @@ class EqualsNoneRule(VibRule):
 # ── VIB084 — not-equals ──────────────────────────────────────────────────────
 
 _NOT_EQUALS_MESSAGES = [
-    "`not x == y` is `x != y` with passive-aggressive energy.",
-    "you negated the whole comparison instead of flipping the operator.",
-    "`!=` exists. it's one character. it's right there on your keyboard.",
-    "`not x == y` — the long way around to say something simple.",
-    "this is `!=` in disguise and the disguise is bad.",
-    "operator precedence anxiety expressed as code.",
+    "`not x == y` is `x != y` with passive-aggressive energy and worse readability.",
+    "you negated the entire comparison instead of just flipping the operator. bold choice. wrong choice.",
+    "`!=` is one character. it is on your keyboard right now. i have seen it there.",
+    "`not x == y` — the scenic route to a conclusion everyone else reached immediately.",
+    "this is literally just `!=` in a disguise and the disguise is not working.",
+    "operator precedence anxiety expressed as a crime against clarity.",
 ]
 
 

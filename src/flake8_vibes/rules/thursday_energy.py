@@ -23,12 +23,12 @@ def _count_lines(node: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
 # ── VIB001 — thursday-energy ─────────────────────────────────────────────────
 
 _MESSAGES = [
-    "'{name}' is {n} lines long and it's Thursday. this could have waited.",
-    "'{name}' has {n} lines of thursday ambition. friday will not fix this.",
-    "thursday energy detected in '{name}' ({n} lines). you were so close to the weekend.",
-    "'{name}' is {n} lines long. written on a thursday. we all felt it.",
-    "'{name}' ({n} lines) — classic thursday overreach.",
-    "did '{name}' really need to be {n} lines? it's thursday. go home.",
+    "'{name}' is {n} lines long and it's Thursday. you absolute menace.",
+    "'{name}' has {n} lines of thursday ambition. friday will not save you from this.",
+    "thursday energy fully detected in '{name}' ({n} lines). you were one day away. ONE day.",
+    "'{name}' is {n} lines of pure thursday hubris. we felt it. the diff felt it.",
+    "'{name}' ({n} lines) — a thursday crime committed in broad daylight.",
+    "{n} lines. on a thursday. '{name}' didn't have to be like this and yet here we are.",
 ]
 
 

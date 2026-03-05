@@ -12,20 +12,20 @@ _PATTERN = re.compile(r"#\s*(TODO|FIXME)\b", re.IGNORECASE)
 
 _MESSAGES: dict[str, list[str]] = {
     "TODO": [
-        "unresolved TODO left to rot",
-        "a TODO is just a dream with a comment attached",
-        "TODO: still here. still waiting. still judging you.",
-        "you wrote TODO and kept moving. bold.",
-        "this TODO has seen three sprints and counting",
-        "a TODO is not a plan, it's a confession",
+        "unresolved TODO left to age like milk, not wine",
+        "a TODO is a dream with a comment attached and no follow-through",
+        "TODO: still here. still waiting. still judging every commit you've made since.",
+        "you wrote TODO and kept moving. bold. irresponsible. classic.",
+        "this TODO has survived more sprints than some of your teammates",
+        "a TODO is not a plan. it's a confession that you knew and did nothing.",
     ],
     "FIXME": [
-        "FIXME has been here longer than some teammates",
-        "you knew it was broken and shipped it anyway",
-        "FIXME: acknowledged, unaddressed, unforgiven",
-        "a FIXME is just a bug with good self-awareness",
-        "the FIXME is still here. so is the shame.",
-        "you wrote FIXME like that would make it someone else's problem",
+        "FIXME has been here longer than some teammates and has more institutional knowledge",
+        "you knew it was broken. you wrote FIXME. you shipped it. incredible.",
+        "FIXME: acknowledged, unaddressed, unforgiven, and now publicly humiliated",
+        "a FIXME is just a bug that developed self-awareness and still didn't get fixed",
+        "the FIXME is still here. so is the shame. they have moved in together.",
+        "you wrote FIXME like that was going to make it someone else's problem. it did not.",
     ],
 }
 
