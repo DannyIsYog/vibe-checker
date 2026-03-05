@@ -25,7 +25,7 @@ def test_plugin_run_returns_iterable():
 
 def test_plugin_run_output_format(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(
-        "flake8_vibes.rules.thursday_energy._is_thursday", lambda _: True
+        "flake8_vibes.rules.calendar_crimes._is_thursday", lambda _: True
     )
     source = "\n".join(["def big_fn():"] + [f"    x_{i} = {i}" for i in range(25)])
     tree = ast.parse(source)
@@ -55,7 +55,7 @@ def test_vib_rule_base_raises():
 
 def test_plugin_no_violations_on_clean_code(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(
-        "flake8_vibes.rules.thursday_energy._is_thursday", lambda _: True
+        "flake8_vibes.rules.calendar_crimes._is_thursday", lambda _: True
     )
     tree = ast.parse("def small(): pass")
     plugin = VibesPlugin(tree, filename="test.py")

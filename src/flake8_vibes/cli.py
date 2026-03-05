@@ -9,6 +9,10 @@ from pathlib import Path
 from flake8_vibes.rules import ALL_RULES, VibError
 from flake8_vibes.scorer import VibeReport, score_to_verdict
 
+_SCORE_HIGH = 90
+_SCORE_MED = 70
+_BAR_WIDTH = 10
+
 _RESET = "\033[0m"
 _BOLD = "\033[1m"
 _GREEN = "\033[32m"
@@ -21,9 +25,9 @@ def _color(text: str, code: str, enabled: bool) -> str:
 
 
 def _score_color(score: int) -> str:
-    if score >= 90:
+    if score >= _SCORE_HIGH:
         return _GREEN
-    if score >= 70:
+    if score >= _SCORE_MED:
         return _YELLOW
     return _RED
 
@@ -38,6 +42,19 @@ def collect_python_files(path: Path) -> list[Path]:
     return sorted(path.rglob("*.py"))
 
 
+def _is_noqa_suppressed(error: VibError, lines: list[str]) -> bool:
+    lineno, _, message, _ = error
+    if lineno < 1 or lineno > len(lines):
+        return False
+    line = lines[lineno - 1]
+    code = message.split()[0]
+    idx = line.find("# noqa:")
+    if idx == -1:
+        return False
+    after = line[idx + len("# noqa:"):].strip()
+    return code in {c.strip() for c in after.split(",")}
+
+
 def check_file(filepath: Path) -> list[VibError]:
     try:
         source = filepath.read_text(encoding="utf-8")
@@ -48,7 +65,7 @@ def check_file(filepath: Path) -> list[VibError]:
     errors: list[VibError] = []
     for rule_class in ALL_RULES:
         errors.extend(rule_class().check(tree, str(filepath), lines))
-    return errors
+    return [e for e in errors if not _is_noqa_suppressed(e, lines)]
 
 
 def build_report(
@@ -85,8 +102,8 @@ def _render_files_section(report: VibeReport, color: bool) -> list[str]:
     lines = ["", "Per-file breakdown:"]
     for filepath, count in sorted(report.violations_by_file.items()):
         fscore = VibeReport.file_score(count)
-        filled = round(fscore / 10)
-        bar = "\u2588" * filled + "\u2591" * (10 - filled)
+        filled = round(fscore / _BAR_WIDTH)
+        bar = "\u2588" * filled + "\u2591" * (_BAR_WIDTH - filled)
         fverdict = _file_verdict(fscore)
         sc = _score_color(fscore)
         colored_bar = _color(bar, sc, color)

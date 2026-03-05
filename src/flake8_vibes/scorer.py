@@ -3,6 +3,9 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass, field
 
+_SCORE_MAX = 100
+_SCORE_PENALTY = 5
+
 _SCORE_VERDICTS: list[tuple[int, list[str]]] = [
     (90, ["she ate and left no crumbs", "slaying", "immaculate", "serving"]),
     (70, ["decent energy", "not bad not great", "it's giving something"]),
@@ -29,11 +32,11 @@ class VibeReport:
 
     @property
     def score(self) -> int:
-        return max(0, min(100, 100 - self.total_violations * 5))
+        return max(0, min(_SCORE_MAX, _SCORE_MAX - self.total_violations * _SCORE_PENALTY))
 
     @staticmethod
     def file_score(count: int) -> int:
-        return max(0, min(100, 100 - count * 5))
+        return max(0, min(_SCORE_MAX, _SCORE_MAX - count * _SCORE_PENALTY))
 
     @property
     def verdict(self) -> str:

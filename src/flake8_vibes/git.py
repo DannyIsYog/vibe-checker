@@ -13,7 +13,7 @@ def get_file_commit_date(filepath: str) -> datetime | None:
             ["git", "log", "-1", "--format=%ai", "--", str(resolved)],
             capture_output=True,
             text=True,
-            timeout=5,
+            timeout=5,  # noqa: VIB045
             cwd=str(resolved.parent),
         )
         output = proc.stdout.strip()
