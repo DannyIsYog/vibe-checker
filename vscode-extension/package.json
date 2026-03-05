@@ -7,10 +7,18 @@
     "vscode": "^1.85.0"
   },
   "activationEvents": [
-    "onLanguage:python"
+    "onLanguage:python",
+    "onCommand:vibe-checker.checkWorkspace"
   ],
   "main": "./out/extension.js",
-  "contributes": {},
+  "contributes": {
+    "commands": [
+      {
+        "command": "vibe-checker.checkWorkspace",
+        "title": "Vibe Checker: Check Workspace"
+      }
+    ]
+  },
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./"
