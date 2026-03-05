@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from flake8_vibes.cli import (
+    _file_verdict,
     build_report,
     check_file,
     collect_python_files,
@@ -102,17 +103,83 @@ def test_render_report_bar_chart():
     assert "#####" in output
 
 
+def test_render_report_color_enabled():
+    report = VibeReport(violations_by_rule={"VIB001": 2}, total_files=1)
+    output = render_report(report, color=True)
+    assert "\033[" in output
+
+
+def test_render_report_color_disabled():
+    report = VibeReport(violations_by_rule={"VIB001": 2}, total_files=1)
+    output = render_report(report, color=False)
+    assert "\033[" not in output
+
+
+def test_render_report_per_file_table():
+    report = VibeReport(
+        violations_by_rule={"VIB001": 1},
+        violations_by_file={"src/main.py": 1, "src/utils.py": 0},
+        total_files=2,
+    )
+    output = render_report(report)
+    assert "src/main.py" in output
+    assert "src/utils.py" in output
+    assert "95/100" in output
+    assert "100/100" in output
+
+
+def test_render_report_per_file_zero_violations_full_bar():
+    report = VibeReport(
+        violations_by_rule={},
+        violations_by_file={"clean.py": 0},
+        total_files=1,
+    )
+    output = render_report(report)
+    assert "100/100" in output
+    assert "\u2588" * 10 in output
+
+
+# --- _file_verdict ---
+
+
+def test_file_verdict_all_tiers():
+    verdicts_90 = ["she ate and left no crumbs", "slaying", "immaculate", "serving"]
+    verdicts_70 = ["decent energy", "not bad not great", "it's giving something"]
+    verdicts_50 = ["concerning", "the vibes are questionable", "we need to talk"]
+    verdicts_25 = ["chaotic", "this is a cry for help", "bestie no"]
+    verdicts_0 = ["cooked", "it's giving dumpster fire", "expired"]
+    assert _file_verdict(100) in verdicts_90
+    assert _file_verdict(75) in verdicts_70
+    assert _file_verdict(55) in verdicts_50
+    assert _file_verdict(30) in verdicts_25
+    assert _file_verdict(0) in verdicts_0
+
+
 # --- build_report ---
 
 
 def test_build_report_counts_by_code():
-    errors = [
-        (1, 0, "VIB001 thursday energy detected: 'fn' is 25 lines long", type),
-        (5, 0, "VIB001 thursday energy detected: 'fn2' is 30 lines long", type),
-    ]
-    report = build_report(errors, total_files=3)  # type: ignore[arg-type]
+    errors_by_file: dict[str, list] = {
+        "a.py": [
+            (1, 0, "VIB001 thursday energy detected: 'fn' is 25 lines long", type),
+            (5, 0, "VIB001 thursday energy detected: 'fn2' is 30 lines long", type),
+        ]
+    }
+    report = build_report(errors_by_file, total_files=3)  # type: ignore[arg-type]
     assert report.violations_by_rule == {"VIB001": 2}
+    assert report.violations_by_file == {"a.py": 2}
     assert report.total_files == 3
+
+
+def test_build_report_per_file_counts():
+    errors_by_file: dict[str, list] = {
+        "a.py": [
+            (1, 0, "VIB001 thursday energy: 'fn' is huge", type),
+        ],
+        "b.py": [],
+    }
+    report = build_report(errors_by_file, total_files=2)  # type: ignore[arg-type]
+    assert report.violations_by_file == {"a.py": 1, "b.py": 0}
 
 
 # --- main() ---
