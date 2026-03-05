@@ -23,7 +23,11 @@ _COMPARISON_OPS = (ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE)
 
 def _is_magic_int(node: ast.AST) -> int | None:
     """Return the int value if node is a magic number constant, else None."""
-    if isinstance(node, ast.Constant) and isinstance(node.value, int) and not isinstance(node.value, bool):
+    if (
+        isinstance(node, ast.Constant)
+        and isinstance(node.value, int)
+        and not isinstance(node.value, bool)
+    ):
         if node.value not in _MAGIC_NUMBER_ALLOWED:
             return node.value
     return
@@ -35,7 +39,14 @@ def _magic_compare_errors(node: ast.Compare, rule_type: type) -> list[VibError]:
         val = _is_magic_int(comparator)
         if val is not None:
             msg = random.choice(_MAGIC_NUMBER_MESSAGES).format(n=val)
-            errors.append((comparator.lineno, comparator.col_offset, f"VIB041 hardcoding: {msg}", rule_type))
+            errors.append(
+                (
+                    comparator.lineno,
+                    comparator.col_offset,
+                    f"VIB041 hardcoding: {msg}",
+                    rule_type,
+                )
+            )
     return errors
 
 
@@ -45,7 +56,14 @@ def _magic_binop_errors(node: ast.BinOp, rule_type: type) -> list[VibError]:
         val = _is_magic_int(operand)
         if val is not None and abs(val) >= _MIN_MAGIC_BINOP:
             msg = random.choice(_MAGIC_NUMBER_MESSAGES).format(n=val)
-            errors.append((operand.lineno, operand.col_offset, f"VIB041 hardcoding: {msg}", rule_type))
+            errors.append(
+                (
+                    operand.lineno,
+                    operand.col_offset,
+                    f"VIB041 hardcoding: {msg}",
+                    rule_type,
+                )
+            )
     return errors
 
 
@@ -111,8 +129,24 @@ _HARDCODED_PORT_MESSAGES = [
 ]
 
 _WELL_KNOWN_PORTS = {
-    80, 443, 3000, 5000, 5432, 8000, 8080, 8888,  # noqa: VIB043
-    3306, 6379, 27017, 9200, 9092, 5672, 1433, 1521, 11211, 9000,  # noqa: VIB043
+    80,  # noqa: VIB043
+    443,  # noqa: VIB043
+    3000,  # noqa: VIB043
+    5000,  # noqa: VIB043
+    5432,  # noqa: VIB043
+    8000,  # noqa: VIB043
+    8080,  # noqa: VIB043
+    8888,  # noqa: VIB043
+    3306,  # noqa: VIB043
+    6379,  # noqa: VIB043
+    27017,  # noqa: VIB043
+    9200,  # noqa: VIB043
+    9092,  # noqa: VIB043
+    5672,  # noqa: VIB043
+    1433,  # noqa: VIB043
+    1521,  # noqa: VIB043
+    11211,  # noqa: VIB043
+    9000,  # noqa: VIB043
 }
 
 
@@ -148,7 +182,14 @@ _HARDCODED_PATH_MESSAGES = [
     "a hardcoded path: an assumption about the filesystem that everyone else will inherit and resent.",
 ]
 
-_PATH_PREFIXES = ("/home/", "/Users/", "C:\\", "C:/", "/var/lib/", "/var/www/")  # noqa: VIB044
+_PATH_PREFIXES = (
+    "/home/",  # noqa: VIB044
+    "/Users/",  # noqa: VIB044
+    "C:\\",  # noqa: VIB044
+    "C:/",  # noqa: VIB044
+    "/var/lib/",  # noqa: VIB044
+    "/var/www/",  # noqa: VIB044
+)
 
 
 class HardcodedPathRule(VibRule):
@@ -191,7 +232,11 @@ _TIMEOUT_KW_MESSAGES = [
 
 
 def _is_numeric_literal(node: ast.AST) -> float | int | None:
-    if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)) and not isinstance(node.value, bool):
+    if (
+        isinstance(node, ast.Constant)
+        and isinstance(node.value, (int, float))
+        and not isinstance(node.value, bool)
+    ):
         return node.value
     return
 
@@ -219,7 +264,14 @@ def _check_timeout_kw(node: ast.Call, rule_type: type) -> list[VibError]:
             val = _is_numeric_literal(kw.value)
             if val is not None:
                 msg = random.choice(_TIMEOUT_KW_MESSAGES).format(n=val)
-                errors.append((kw.value.lineno, kw.value.col_offset, f"VIB045 hardcoding: {msg}", rule_type))
+                errors.append(
+                    (
+                        kw.value.lineno,
+                        kw.value.col_offset,
+                        f"VIB045 hardcoding: {msg}",
+                        rule_type,
+                    )
+                )
     return errors
 
 
@@ -252,11 +304,25 @@ _HARDCODED_CREDS_MESSAGES = [
     "string assigned to `{name}`. credentials in source are credentials that have already leaked.",
 ]
 
-_CRED_NAMES = frozenset({
-    "password", "passwd", "secret", "api_key", "apikey", "access_key",
-    "secret_key", "auth_token", "token", "private_key", "credentials",
-    "passphrase", "client_secret", "app_secret", "db_password",
-})
+_CRED_NAMES = frozenset(
+    {
+        "password",
+        "passwd",
+        "secret",
+        "api_key",
+        "apikey",
+        "access_key",
+        "secret_key",
+        "auth_token",
+        "token",
+        "private_key",
+        "credentials",
+        "passphrase",
+        "client_secret",
+        "app_secret",
+        "db_password",
+    }
+)
 
 
 def _check_cred_assign(node: ast.Assign, rule_type: type) -> list[VibError]:
@@ -272,7 +338,9 @@ def _check_cred_assign(node: ast.Assign, rule_type: type) -> list[VibError]:
             and node.value.value.strip()
         ):
             msg = random.choice(_HARDCODED_CREDS_MESSAGES).format(name=target.id)
-            errors.append((node.lineno, node.col_offset, f"VIB046 hardcoding: {msg}", rule_type))
+            errors.append(
+                (node.lineno, node.col_offset, f"VIB046 hardcoding: {msg}", rule_type)
+            )
     return errors
 
 
@@ -316,7 +384,10 @@ class HardcodedLocalhostRule(VibRule):
             if (
                 isinstance(node, ast.Constant)
                 and isinstance(node.value, str)
-                and ("localhost" in node.value or "127.0.0.1" in node.value)  # noqa: VIB047
+                and (
+                    "localhost" in node.value  # noqa: VIB047
+                    or "127.0.0.1" in node.value  # noqa: VIB047
+                )
             ):
                 msg = random.choice(_HARDCODED_LOCALHOST_MESSAGES)
                 prefix = f"VIB047 hardcoding: {msg}"

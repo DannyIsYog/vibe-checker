@@ -53,7 +53,7 @@ def _is_noqa_suppressed(error: VibError, lines: list[str]) -> bool:
     idx = line.find("# noqa:")
     if idx == -1:
         return False
-    after = line[idx + len("# noqa:"):].strip()
+    after = line[idx + len("# noqa:") :].strip()
     return code in {c.strip() for c in after.split(",")}
 
 
@@ -182,11 +182,15 @@ def main() -> None:
     workers = min(os.cpu_count() or 1, len(files)) if len(files) > 1 else 1
     with ProcessPoolExecutor(max_workers=workers) as pool:
         results = list(pool.map(check_file, files))
-    errors_by_file: dict[str, list[VibError]] = {str(f): r for f, r in zip(files, results)}
+    errors_by_file: dict[str, list[VibError]] = {
+        str(f): r for f, r in zip(files, results)
+    }
     if args.json:
         sys.stdout.write(_format_json(errors_by_file) + "\n")
         return
     report = build_report(errors_by_file, total_files=len(files))
-    sys.stdout.write(render_report(report, quiet=args.quiet, color=sys.stdout.isatty()) + "\n")
+    sys.stdout.write(
+        render_report(report, quiet=args.quiet, color=sys.stdout.isatty()) + "\n"
+    )
     if report.score < args.threshold:
         raise SystemExit(1)

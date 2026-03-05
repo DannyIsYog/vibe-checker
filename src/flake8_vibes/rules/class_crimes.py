@@ -29,7 +29,10 @@ class MultipleInheritanceRule(VibRule):
     ) -> list[VibError]:
         errors: list[VibError] = []
         for node in ast.walk(tree):
-            if isinstance(node, ast.ClassDef) and len(node.bases) >= _MIN_BASES_FOR_INHERITANCE_CRIME:
+            if (
+                isinstance(node, ast.ClassDef)
+                and len(node.bases) >= _MIN_BASES_FOR_INHERITANCE_CRIME
+            ):
                 base_count = len(node.bases)
                 bases = ", ".join(
                     (b.id if isinstance(b, ast.Name) else "...") for b in node.bases
@@ -76,7 +79,9 @@ def _str_returns_dict_errors(func: ast.FunctionDef, rule_type: type) -> list[Vib
         if isinstance(stmt, ast.Return) and stmt.value is not None:
             if _is_self_dict(stmt.value) or _is_str_dict_call(stmt.value):
                 msg = random.choice(_STR_RETURNS_DICT_MESSAGES)
-                errors.append((stmt.lineno, stmt.col_offset, f"VIB058 class: {msg}", rule_type))
+                errors.append(
+                    (stmt.lineno, stmt.col_offset, f"VIB058 class: {msg}", rule_type)
+                )
     return errors
 
 
@@ -106,6 +111,20 @@ _EMPTY_EXCEPT_DEL_MESSAGES = [
 ]
 
 
+def _del_pass_handlers(tree: ast.AST) -> list[ast.ExceptHandler]:
+    handlers = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.FunctionDef) or node.name != "__del__":
+            continue
+        for stmt in ast.walk(node):
+            if not isinstance(stmt, ast.Try):
+                continue
+            for handler in stmt.handlers:
+                if all(isinstance(s, ast.Pass) for s in handler.body):
+                    handlers.append(handler)
+    return handlers
+
+
 class EmptyExceptInDelRule(VibRule):
     code = "VIB059"
 
@@ -116,16 +135,9 @@ class EmptyExceptInDelRule(VibRule):
         lines: list[str] | None = None,
     ) -> list[VibError]:
         errors: list[VibError] = []
-        for node in ast.walk(tree):
-            if not isinstance(node, ast.FunctionDef) or node.name != "__del__":
-                continue
-            for stmt in ast.walk(node):
-                if not isinstance(stmt, ast.Try):
-                    continue
-                for handler in stmt.handlers:
-                    if all(isinstance(s, ast.Pass) for s in handler.body):
-                        msg = random.choice(_EMPTY_EXCEPT_DEL_MESSAGES)
-                        errors.append((handler.lineno, handler.col_offset, f"VIB059 class: {msg}", type(self)))
+        for h in _del_pass_handlers(tree):
+            msg = random.choice(_EMPTY_EXCEPT_DEL_MESSAGES)
+            errors.append((h.lineno, h.col_offset, f"VIB059 class: {msg}", type(self)))
         return errors
 
 
@@ -170,7 +182,9 @@ class ClassNoDocstringRule(VibRule):
                 msg = random.choice(_CLASS_NO_DOCSTRING_MESSAGES).format(
                     name=node.name, n=line_count
                 )
-                errors.append((node.lineno, node.col_offset, f"VIB060 class: {msg}", type(self)))
+                errors.append(
+                    (node.lineno, node.col_offset, f"VIB060 class: {msg}", type(self))
+                )
         return errors
 
 
@@ -199,15 +213,22 @@ def _has_super_init_call(func: ast.FunctionDef) -> bool:
 
 
 def _super_init_missing_errors(cls: ast.ClassDef, rule_type: type) -> list[VibError]:
-    real_bases = [b for b in cls.bases if not (isinstance(b, ast.Name) and b.id == "object")]
+    real_bases = [
+        b for b in cls.bases if not (isinstance(b, ast.Name) and b.id == "object")
+    ]
     if not real_bases:
         return []
     errors: list[VibError] = []
     for item in cls.body:
-        if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)) and item.name == "__init__":
+        if (
+            isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and item.name == "__init__"
+        ):
             if not _has_super_init_call(item):
                 msg = random.choice(_SUPER_INIT_MESSAGES).format(name=cls.name)
-                errors.append((item.lineno, item.col_offset, f"VIB061 class: {msg}", rule_type))
+                errors.append(
+                    (item.lineno, item.col_offset, f"VIB061 class: {msg}", rule_type)
+                )
     return errors
 
 
@@ -236,13 +257,32 @@ _NO_OP_OVERRIDE_MESSAGES = [
     "`{name}` is an override that changes nothing. it is a costume on a costume.",
 ]
 
-_MAGIC_METHODS = frozenset({
-    "__init__", "__str__", "__repr__", "__eq__", "__hash__",
-    "__lt__", "__le__", "__gt__", "__ge__", "__ne__",
-    "__enter__", "__exit__", "__len__", "__iter__", "__next__",
-    "__getitem__", "__setitem__", "__delitem__", "__contains__",
-    "__call__", "__del__", "__new__",
-})
+_MAGIC_METHODS = frozenset(
+    {
+        "__init__",
+        "__str__",
+        "__repr__",
+        "__eq__",
+        "__hash__",
+        "__lt__",
+        "__le__",
+        "__gt__",
+        "__ge__",
+        "__ne__",
+        "__enter__",
+        "__exit__",
+        "__len__",
+        "__iter__",
+        "__next__",
+        "__getitem__",
+        "__setitem__",
+        "__delitem__",
+        "__contains__",
+        "__call__",
+        "__del__",
+        "__new__",
+    }
+)
 
 
 def _is_super_passthrough(func: ast.FunctionDef) -> bool:
@@ -267,6 +307,21 @@ def _is_super_passthrough(func: ast.FunctionDef) -> bool:
     )
 
 
+def _no_op_overrides(tree: ast.AST) -> list[ast.FunctionDef]:
+    overrides = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.ClassDef) or not node.bases:
+            continue
+        for item in node.body:
+            if not isinstance(item, ast.FunctionDef):
+                continue
+            if item.name in _MAGIC_METHODS:
+                continue
+            if _is_super_passthrough(item):
+                overrides.append(item)
+    return overrides
+
+
 class NoOpOverrideRule(VibRule):
     code = "VIB062"
 
@@ -277,17 +332,9 @@ class NoOpOverrideRule(VibRule):
         lines: list[str] | None = None,
     ) -> list[VibError]:
         errors: list[VibError] = []
-        for node in ast.walk(tree):
-            if not isinstance(node, ast.ClassDef):
-                continue
-            if not node.bases:
-                continue
-            for item in node.body:
-                if not isinstance(item, ast.FunctionDef):
-                    continue
-                if item.name in _MAGIC_METHODS:
-                    continue
-                if _is_super_passthrough(item):
-                    msg = random.choice(_NO_OP_OVERRIDE_MESSAGES).format(name=item.name)
-                    errors.append((item.lineno, item.col_offset, f"VIB062 class: {msg}", type(self)))
+        for item in _no_op_overrides(tree):
+            msg = random.choice(_NO_OP_OVERRIDE_MESSAGES).format(name=item.name)
+            errors.append(
+                (item.lineno, item.col_offset, f"VIB062 class: {msg}", type(self))
+            )
         return errors

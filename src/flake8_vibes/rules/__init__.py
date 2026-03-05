@@ -8,6 +8,12 @@ from flake8_vibes.rules.boolean_chaos import (
     EqualsTrueRule,
     NotEqualsRule,
 )
+from flake8_vibes.rules.calendar_crimes import (
+    DecemberCodeRule,
+    FridayDeployRule,
+    MondayMotivationRule,
+    ThursdayEnergyRule,
+)
 from flake8_vibes.rules.class_crimes import (
     ClassNoDocstringRule,
     EmptyExceptInDelRule,
@@ -112,12 +118,6 @@ from flake8_vibes.rules.test_vibes import (
     TestNamedTestItRule,
     TestNoAssertionRule,
     TimeSleepInTestRule,
-)
-from flake8_vibes.rules.calendar_crimes import (
-    DecemberCodeRule,
-    FridayDeployRule,
-    MondayMotivationRule,
-    ThursdayEnergyRule,
 )
 from flake8_vibes.rules.todo_shame import TodoShameRule
 

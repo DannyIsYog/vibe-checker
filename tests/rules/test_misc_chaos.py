@@ -215,18 +215,14 @@ def test_097_messages_list():
 
 
 def test_098_flags_assert_in_non_test():
-    errors = AssertInNonTestRule().check(
-        parse("assert x > 0"), filename="my_module.py"
-    )
+    errors = AssertInNonTestRule().check(parse("assert x > 0"), filename="my_module.py")
     assert len(errors) == 1
     assert "VIB098" in errors[0][2]
 
 
 def test_098_no_flag_in_test_file():
     assert (
-        AssertInNonTestRule().check(
-            parse("assert x > 0"), filename="test_my_module.py"
-        )
+        AssertInNonTestRule().check(parse("assert x > 0"), filename="test_my_module.py")
         == []
     )
 

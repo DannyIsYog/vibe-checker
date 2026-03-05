@@ -15,7 +15,6 @@ _STRING_CONCAT_LOOP_MESSAGES = [
 ]
 
 
-
 def _is_string_aug_add(child: ast.AST) -> bool:
     """Return True if child is a string AugAssign with Add op."""
     if not (isinstance(child, ast.AugAssign) and isinstance(child.op, ast.Add)):
@@ -128,7 +127,9 @@ def _collect_docstring_node_ids(tree: ast.AST) -> set[int]:
     """Return id()s of Expr nodes that are legitimate docstrings."""
     ids: set[int] = set()
     for node in ast.walk(tree):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)):
+        if isinstance(
+            node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)
+        ):
             if (
                 node.body
                 and isinstance(node.body[0], ast.Expr)

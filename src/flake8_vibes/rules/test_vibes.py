@@ -163,13 +163,17 @@ _COPY_PASTED_TEST_MESSAGES = [
 ]
 
 
-def _duplicate_test_errors(body_dumps: dict[str, list[ast.FunctionDef]], rule_type: type) -> list[VibError]:
+def _duplicate_test_errors(
+    body_dumps: dict[str, list[ast.FunctionDef]], rule_type: type
+) -> list[VibError]:
     errors: list[VibError] = []
     for funcs in body_dumps.values():
         if len(funcs) >= 2:
             for func in funcs[1:]:
                 msg = random.choice(_COPY_PASTED_TEST_MESSAGES).format(name=func.name)
-                errors.append((func.lineno, func.col_offset, f"VIB073 test: {msg}", rule_type))
+                errors.append(
+                    (func.lineno, func.col_offset, f"VIB073 test: {msg}", rule_type)
+                )
     return errors
 
 
@@ -185,7 +189,8 @@ class CopyPastedTestRule(VibRule):
         if "test" not in filename.lower():
             return []
         test_funcs = [
-            node for node in ast.walk(tree)
+            node
+            for node in ast.walk(tree)
             if isinstance(node, ast.FunctionDef) and node.name.startswith("test_")
         ]
         body_dumps: dict[str, list[ast.FunctionDef]] = {}

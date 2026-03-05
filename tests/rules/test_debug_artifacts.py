@@ -166,6 +166,7 @@ def test_011_messages_list():
 
 # ── VIB012: console.log in .py ───────────────────────────────────────────────
 
+
 def check_console_log(source: str) -> list:
     tree = ast.parse(textwrap.dedent(source))
     lines = textwrap.dedent(source).splitlines(keepends=True)

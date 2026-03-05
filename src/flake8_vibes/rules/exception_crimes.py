@@ -83,7 +83,16 @@ _RERAISE_NO_LOG_MESSAGES = [
     "catching to re-raise with no evidence is how you guarantee the bug dies a mysterious death in production.",
 ]
 
-_LOG_METHOD_NAMES = {"error", "warning", "warn", "info", "debug", "exception", "critical", "log"}
+_LOG_METHOD_NAMES = {
+    "error",
+    "warning",
+    "warn",
+    "info",
+    "debug",
+    "exception",
+    "critical",
+    "log",
+}
 
 
 def _handler_has_logging(handler: ast.ExceptHandler) -> bool:
@@ -92,6 +101,10 @@ def _handler_has_logging(handler: ast.ExceptHandler) -> bool:
             if node.func.attr in _LOG_METHOD_NAMES:
                 return True
     return False
+
+
+def _find_reraises(handler: ast.ExceptHandler) -> list[ast.Raise]:
+    return [n for n in ast.walk(handler) if isinstance(n, ast.Raise) and n.exc is None]
 
 
 class ReraiseNoLogRule(VibRule):
@@ -107,9 +120,11 @@ class ReraiseNoLogRule(VibRule):
         for node in ast.walk(tree):
             if not isinstance(node, ast.ExceptHandler):
                 continue
-            reraises = [n for n in ast.walk(node) if isinstance(n, ast.Raise) and n.exc is None]
-            if reraises and not _handler_has_logging(node):
-                for reraise in reraises:
-                    msg = random.choice(_RERAISE_NO_LOG_MESSAGES)
-                    errors.append((reraise.lineno, reraise.col_offset, f"VIB007 exception: {msg}", type(self)))
+            reraises = _find_reraises(node)
+            if not reraises or _handler_has_logging(node):
+                continue
+            for reraise in reraises:
+                msg = random.choice(_RERAISE_NO_LOG_MESSAGES)
+                prefix = f"VIB007 exception: {msg}"
+                errors.append((reraise.lineno, reraise.col_offset, prefix, type(self)))
         return errors

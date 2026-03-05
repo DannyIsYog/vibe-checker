@@ -171,5 +171,6 @@ class ConsoleLogInPyRule(VibRule):
             before = line[: match.start()]
             if "#" in before or line.lstrip().startswith("#"):
                 continue
-            errors.append((i + 1, 0, f"VIB012 debug: {random.choice(_CONSOLE_LOG_MESSAGES)}", type(self)))
+            msg = random.choice(_CONSOLE_LOG_MESSAGES)
+            errors.append((i + 1, 0, f"VIB012 debug: {msg}", type(self)))
         return errors

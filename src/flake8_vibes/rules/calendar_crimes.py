@@ -98,7 +98,9 @@ class MondayMotivationRule(VibRule):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 line_count = _count_lines(node)
                 if line_count < _MONDAY_SMALL_THRESHOLD:
-                    msg = random.choice(_MONDAY_MESSAGES).format(name=node.name, n=line_count)
+                    msg = random.choice(_MONDAY_MESSAGES).format(
+                        name=node.name, n=line_count
+                    )
                     prefix = f"VIB064 calendar: {msg}"
                     errors.append((node.lineno, node.col_offset, prefix, type(self)))
         return errors

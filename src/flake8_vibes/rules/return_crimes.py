@@ -80,9 +80,7 @@ def _is_assign_then_return(stmt: ast.stmt, next_stmt: ast.stmt) -> bool:
     )
 
 
-def _check_assign_return(
-    body: list[ast.stmt], rule_type: type
-) -> list[VibError]:
+def _check_assign_return(body: list[ast.stmt], rule_type: type) -> list[VibError]:
     errors: list[VibError] = []
     for i in range(len(body) - 1):
         if _is_assign_then_return(body[i], body[i + 1]):
@@ -171,9 +169,7 @@ class ShadowBuiltinRule(VibRule):
                     msg_tpl = random.choice(_SHADOW_BUILTIN_MESSAGES)
                     msg = msg_tpl.format(name=target.id)
                     prefix = f"VIB056 return: {msg}"
-                    errors.append(
-                        (node.lineno, node.col_offset, prefix, type(self))
-                    )
+                    errors.append((node.lineno, node.col_offset, prefix, type(self)))
         return errors
 
 
@@ -201,6 +197,15 @@ def _call_func_ids(tree: ast.AST) -> set[int]:
     return {id(node.func) for node in ast.walk(tree) if isinstance(node, ast.Call)}
 
 
+def _is_used_discard(node: ast.AST, call_funcs: set[int]) -> bool:
+    return (
+        isinstance(node, ast.Name)
+        and node.id == "_"
+        and isinstance(node.ctx, ast.Load)
+        and id(node) not in call_funcs
+    )
+
+
 class UnderscoreUsedRule(VibRule):
     code = "VIB057"
 
@@ -215,6 +220,8 @@ class UnderscoreUsedRule(VibRule):
         call_funcs = _call_func_ids(tree)
         errors: list[VibError] = []
         for node in ast.walk(tree):
-            if isinstance(node, ast.Name) and node.id == "_" and isinstance(node.ctx, ast.Load) and id(node) not in call_funcs:
-                errors.append((node.lineno, node.col_offset, f"VIB057 return: {random.choice(_UNDERSCORE_USED_MESSAGES)}", type(self)))
+            if _is_used_discard(node, call_funcs):
+                msg = random.choice(_UNDERSCORE_USED_MESSAGES)
+                prefix = f"VIB057 return: {msg}"
+                errors.append((node.lineno, node.col_offset, prefix, type(self)))
         return errors

@@ -45,12 +45,7 @@ def test_074_no_flag_sync_function():
 
 
 def test_074_nested_function_not_considered():
-    src = (
-        "async def outer():\n"
-        "    def inner():\n"
-        "        pass\n"
-        "    return 1\n"
-    )
+    src = "async def outer():\n" "    def inner():\n" "        pass\n" "    return 1\n"
     # outer has no await (the nested sync fn doesn't count)
     errors = check_no_await(src)
     assert len(errors) == 1

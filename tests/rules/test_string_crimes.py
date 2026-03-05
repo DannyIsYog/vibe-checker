@@ -148,6 +148,7 @@ def test_079_messages_list():
 
 # ── VIB080: multiline string as comment ──────────────────────────────────────
 
+
 def check_multiline(source: str) -> list:
     return MultilineStringCommentRule().check(ast.parse(textwrap.dedent(source)))
 

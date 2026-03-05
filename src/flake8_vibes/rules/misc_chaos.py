@@ -384,9 +384,15 @@ def _private_exports_in_assign(node: ast.Assign, rule_type: type) -> list[VibErr
         return []
     errors: list[VibError] = []
     for elt in node.value.elts:
-        if isinstance(elt, ast.Constant) and isinstance(elt.value, str) and elt.value.startswith("_"):
+        if (
+            isinstance(elt, ast.Constant)
+            and isinstance(elt.value, str)
+            and elt.value.startswith("_")
+        ):
             msg = random.choice(_ALL_PRIVATE_MESSAGES).format(name=elt.value)
-            errors.append((elt.lineno, elt.col_offset, f"VIB093 misc: {msg}", rule_type))
+            errors.append(
+                (elt.lineno, elt.col_offset, f"VIB093 misc: {msg}", rule_type)
+            )
     return errors
 
 
@@ -418,6 +424,24 @@ _ZERO_STAR_MESSAGES = [
 _ZERO_STAR_MIN_PRINTS = 5
 
 
+def _is_zero_star(tree: ast.AST) -> bool:
+    nodes = list(ast.walk(tree))
+    has_structure = any(
+        isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+        for n in nodes
+    )
+    if has_structure:
+        return False
+    print_count = sum(
+        1
+        for n in nodes
+        if isinstance(n, ast.Call)
+        and isinstance(n.func, ast.Name)
+        and n.func.id == "print"
+    )
+    return print_count >= _ZERO_STAR_MIN_PRINTS
+
+
 class ZeroStarRepoRule(VibRule):
     code = "VIB100"
 
@@ -427,14 +451,7 @@ class ZeroStarRepoRule(VibRule):
         filename: str = "<unknown>",
         lines: list[str] | None = None,
     ) -> list[VibError]:
-        all_nodes = list(ast.walk(tree))
-        has_structure = any(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) for n in all_nodes)
-        if has_structure:
+        if not _is_zero_star(tree):
             return []
-        print_count = sum(
-            1 for n in all_nodes
-            if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "print"
-        )
-        if print_count >= _ZERO_STAR_MIN_PRINTS:
-            return [(1, 0, f"VIB100 misc: {random.choice(_ZERO_STAR_MESSAGES)}", type(self))]
-        return []
+        msg = random.choice(_ZERO_STAR_MESSAGES)
+        return [(1, 0, f"VIB100 misc: {msg}", type(self))]

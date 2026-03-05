@@ -5,13 +5,13 @@ import ast
 import pytest
 
 from flake8_vibes.rules.calendar_crimes import (
+    _DECEMBER_MESSAGES,
+    _FRIDAY_MESSAGES,
+    _MONDAY_MESSAGES,
     DecemberCodeRule,
     FridayDeployRule,
     MondayMotivationRule,
     ThursdayEnergyRule,
-    _DECEMBER_MESSAGES,
-    _FRIDAY_MESSAGES,
-    _MONDAY_MESSAGES,
 )
 
 
@@ -120,7 +120,9 @@ def monday(monkeypatch: pytest.MonkeyPatch):
 
 @pytest.fixture
 def not_monday(monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setattr("flake8_vibes.rules.calendar_crimes._is_monday", lambda _: False)
+    monkeypatch.setattr(
+        "flake8_vibes.rules.calendar_crimes._is_monday", lambda _: False
+    )
 
 
 def test_064_flags_tiny_function_on_monday(monday):
@@ -154,7 +156,9 @@ def friday(monkeypatch: pytest.MonkeyPatch):
 
 @pytest.fixture
 def not_friday(monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setattr("flake8_vibes.rules.calendar_crimes._is_friday", lambda _: False)
+    monkeypatch.setattr(
+        "flake8_vibes.rules.calendar_crimes._is_friday", lambda _: False
+    )
 
 
 def test_065_flags_on_friday(friday):
@@ -181,12 +185,16 @@ def test_065_messages_list():
 
 @pytest.fixture
 def december(monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setattr("flake8_vibes.rules.calendar_crimes._is_december", lambda _: True)
+    monkeypatch.setattr(
+        "flake8_vibes.rules.calendar_crimes._is_december", lambda _: True
+    )
 
 
 @pytest.fixture
 def not_december(monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setattr("flake8_vibes.rules.calendar_crimes._is_december", lambda _: False)
+    monkeypatch.setattr(
+        "flake8_vibes.rules.calendar_crimes._is_december", lambda _: False
+    )
 
 
 def test_067_flags_in_december(december):

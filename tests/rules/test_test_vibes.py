@@ -79,10 +79,7 @@ def test_069_assert_in_if_block():
 
 def test_069_nested_def_skipped_still_flags_outer():
     src = (
-        "def test_outer():\n"
-        "    def inner():\n"
-        "        assert True\n"
-        "    pass\n"
+        "def test_outer():\n" "    def inner():\n" "        assert True\n" "    pass\n"
     )
     # outer has no assert (inner's assert doesn't count)
     errors = check_no_assertion(src)
@@ -181,6 +178,7 @@ def test_072_messages_list():
 
 
 # ── VIB073: copy-pasted test body ────────────────────────────────────────────
+
 
 def check_copy_paste(source: str) -> list:
     tree = ast.parse(textwrap.dedent(source))

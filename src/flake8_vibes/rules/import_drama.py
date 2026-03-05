@@ -12,9 +12,8 @@ from flake8_vibes.rules.base import VibError, VibRule
 def _get_all_exports(tree: ast.AST) -> set[str]:
     """Names listed in module-level __all__."""
     for node in ast.walk(tree):
-        if (
-            isinstance(node, ast.Assign)
-            and any(isinstance(t, ast.Name) and t.id == "__all__" for t in node.targets)
+        if isinstance(node, ast.Assign) and any(
+            isinstance(t, ast.Name) and t.id == "__all__" for t in node.targets
         ):
             if isinstance(node.value, (ast.List, ast.Tuple)):
                 return {
@@ -34,6 +33,7 @@ def _get_non_import_names(tree: ast.AST) -> set[str]:
         if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load):
             used.add(node.id)
     return used
+
 
 # ── VIB048 — import * ───────────────────────────────────────────────────────
 
@@ -118,7 +118,9 @@ _UNUSED_IMPORT_MESSAGES = [
 ]
 
 
-def _from_import_errors(node: ast.ImportFrom, used: set[str], rule_type: type) -> list[VibError]:
+def _from_import_errors(
+    node: ast.ImportFrom, used: set[str], rule_type: type
+) -> list[VibError]:
     errors: list[VibError] = []
     for alias in node.names:
         if alias.name == "*":
@@ -126,17 +128,23 @@ def _from_import_errors(node: ast.ImportFrom, used: set[str], rule_type: type) -
         name = alias.asname if alias.asname else alias.name
         if name not in used:
             msg = random.choice(_UNUSED_IMPORT_MESSAGES).format(name=name)
-            errors.append((node.lineno, node.col_offset, f"VIB049 import: {msg}", rule_type))
+            errors.append(
+                (node.lineno, node.col_offset, f"VIB049 import: {msg}", rule_type)
+            )
     return errors
 
 
-def _plain_import_errors(node: ast.Import, used: set[str], rule_type: type) -> list[VibError]:
+def _plain_import_errors(
+    node: ast.Import, used: set[str], rule_type: type
+) -> list[VibError]:
     errors: list[VibError] = []
     for alias in node.names:
         name = alias.asname if alias.asname else alias.name.split(".")[0]
         if name not in used:
             msg = random.choice(_UNUSED_IMPORT_MESSAGES).format(name=name)
-            errors.append((node.lineno, node.col_offset, f"VIB049 import: {msg}", rule_type))
+            errors.append(
+                (node.lineno, node.col_offset, f"VIB049 import: {msg}", rule_type)
+            )
     return errors
 
 
@@ -168,16 +176,18 @@ _DEAD_FUTURE_MESSAGES = [
     "`{name}` from `__future__` — python 2 is gone. this import should be too.",
 ]
 
-_DEAD_FUTURE_IMPORTS = frozenset({
-    "print_function",
-    "unicode_literals",
-    "division",
-    "absolute_import",
-    "with_statement",
-    "generators",
-    "nested_scopes",
-    "generator_stop",
-})
+_DEAD_FUTURE_IMPORTS = frozenset(
+    {
+        "print_function",
+        "unicode_literals",
+        "division",
+        "absolute_import",
+        "with_statement",
+        "generators",
+        "nested_scopes",
+        "generator_stop",
+    }
+)
 
 
 class FutureImportDeadRule(VibRule):
@@ -252,5 +262,7 @@ class OsPathImportRule(VibRule):
             return []
         errors: list[VibError] = []
         for node in os_imports:
-            errors.append((node.lineno, node.col_offset, f"VIB052 import: {random.choice(_OS_PATH_MESSAGES)}", type(self)))
+            msg = random.choice(_OS_PATH_MESSAGES)
+            prefix = f"VIB052 import: {msg}"
+            errors.append((node.lineno, node.col_offset, prefix, type(self)))
         return errors

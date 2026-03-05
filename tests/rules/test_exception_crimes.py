@@ -118,6 +118,7 @@ def test_006_messages_list():
 
 # ── VIB007: re-raise without logging ─────────────────────────────────────────
 
+
 def parse7(source: str) -> ast.AST:
     return ast.parse(textwrap.dedent(source))
 

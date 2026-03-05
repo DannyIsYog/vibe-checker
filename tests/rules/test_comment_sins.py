@@ -61,7 +61,9 @@ def test_021_no_flag_plain_comments():
 
 
 def test_021_returns_empty_if_no_lines():
-    assert check_no_lines(CommentedCodeGraveyardRule, "# x = 1\n# y = 2\n# z = 3\n") == []
+    assert (
+        check_no_lines(CommentedCodeGraveyardRule, "# x = 1\n# y = 2\n# z = 3\n") == []
+    )
 
 
 def test_021_flags_at_first_line():
@@ -297,6 +299,7 @@ def test_029_messages_list():
 
 # ── VIB025: obvious comment ───────────────────────────────────────────────────
 
+
 def check_obvious(source: str) -> list:
     tree = ast.parse(textwrap.dedent(source))
     lines = textwrap.dedent(source).splitlines(keepends=True)
@@ -336,6 +339,7 @@ def test_025_messages_list():
 
 
 # ── VIB035: magic comment ─────────────────────────────────────────────────────
+
 
 def check_magic(source: str) -> list:
     tree = ast.parse(textwrap.dedent(source))

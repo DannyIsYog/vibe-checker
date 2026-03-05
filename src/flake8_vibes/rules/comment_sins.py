@@ -1,12 +1,24 @@
 from __future__ import annotations
 
 import ast
-import re
 import random
+import re
 
 from flake8_vibes.rules.base import VibError, VibRule
 
-_CODE_INDICATORS = ("=", "(", ")", "self.", "return ", "def ", "class ", "import ", "for ", "if ", "while ")
+_CODE_INDICATORS = (
+    "=",
+    "(",
+    ")",
+    "self.",
+    "return ",
+    "def ",
+    "class ",
+    "import ",
+    "for ",
+    "if ",
+    "while ",
+)
 _GRAVEYARD_MIN_RUN = 3
 
 # ── VIB021 — commented-out code graveyard ───────────────────────────────────
@@ -27,6 +39,21 @@ def _line_looks_like_code_comment(line: str) -> bool:
     return any(indicator in content for indicator in _CODE_INDICATORS)
 
 
+def _graveyard_positions(lines: list[str]) -> list[int]:
+    positions = []
+    run_start, run_length = -1, 0
+    for i, line in enumerate(lines):
+        if _line_looks_like_code_comment(line):
+            if run_length == 0:
+                run_start = i
+            run_length += 1
+            if run_length == _GRAVEYARD_MIN_RUN:
+                positions.append(run_start + 1)
+        else:
+            run_start, run_length = -1, 0
+    return positions
+
+
 class CommentedCodeGraveyardRule(VibRule):
     code = "VIB021"
 
@@ -38,19 +65,15 @@ class CommentedCodeGraveyardRule(VibRule):
     ) -> list[VibError]:
         if lines is None:
             return []
-        errors: list[VibError] = []
-        run_start, run_length = -1, 0
-        for i, line in enumerate(lines):
-            if _line_looks_like_code_comment(line):
-                if run_length == 0:
-                    run_start = i
-                run_length += 1
-                if run_length == _GRAVEYARD_MIN_RUN:
-                    msg = random.choice(_COMMENTED_CODE_MESSAGES)
-                    errors.append((run_start + 1, 0, f"VIB021 comment: {msg}", type(self)))
-            else:
-                run_start, run_length = -1, 0
-        return errors
+        return [
+            (
+                pos,
+                0,
+                f"VIB021 comment: {random.choice(_COMMENTED_CODE_MESSAGES)}",
+                type(self),
+            )
+            for pos in _graveyard_positions(lines)
+        ]
 
 
 # ── VIB022 — type: ignore without explanation ────────────────────────────────
@@ -67,7 +90,7 @@ _TYPE_IGNORE_MARKER = "# type:" + " ignore"
 
 
 def _type_ignore_has_explanation(line: str) -> bool:
-    after = line[line.index(_TYPE_IGNORE_MARKER) + len(_TYPE_IGNORE_MARKER):]
+    after = line[line.index(_TYPE_IGNORE_MARKER) + len(_TYPE_IGNORE_MARKER) :]
     after_stripped = re.sub(r"^\[[^\]]*\]", "", after.strip()).strip()
     return after_stripped.startswith("#")
 
@@ -116,7 +139,7 @@ class NoqaNoCodeRule(VibRule):
         _noqa = "#" + " noqa"
         for i, line in enumerate(lines):
             if _noqa in line:
-                after = line[line.index(_noqa) + len(_noqa):]
+                after = line[line.index(_noqa) + len(_noqa) :]
                 if not after.lstrip().startswith(":"):
                     msg = random.choice(_NOQA_NO_CODE_MESSAGES)
                     prefix = f"VIB023 comment: {msg}"
@@ -297,16 +320,67 @@ _OBVIOUS_COMMENT_MESSAGES = [
     "a comment that mirrors the next line is a comment that adds nothing and says everything wrong.",
 ]
 
-_OBVIOUS_VERBS = frozenset({
-    "increment", "decrement", "initialize", "init", "reset", "set", "get",
-    "return", "add", "append", "check", "update", "clear", "process",
-    "calculate", "compute", "fetch", "load", "save", "store", "create",
-    "delete", "remove", "count", "sort", "filter", "convert", "format",
-    "assign", "define", "call", "run", "execute", "start", "stop",
-    "open", "close", "read", "write", "send", "receive", "log", "print",
-    "loop", "iterate", "build", "parse", "validate", "handle", "raise",
-    "yield", "collect", "merge", "split", "join", "insert", "pop",
-})
+_OBVIOUS_VERBS = frozenset(
+    {
+        "increment",
+        "decrement",
+        "initialize",
+        "init",
+        "reset",
+        "set",
+        "get",
+        "return",
+        "add",
+        "append",
+        "check",
+        "update",
+        "clear",
+        "process",
+        "calculate",
+        "compute",
+        "fetch",
+        "load",
+        "save",
+        "store",
+        "create",
+        "delete",
+        "remove",
+        "count",
+        "sort",
+        "filter",
+        "convert",
+        "format",
+        "assign",
+        "define",
+        "call",
+        "run",
+        "execute",
+        "start",
+        "stop",
+        "open",
+        "close",
+        "read",
+        "write",
+        "send",
+        "receive",
+        "log",
+        "print",
+        "loop",
+        "iterate",
+        "build",
+        "parse",
+        "validate",
+        "handle",
+        "raise",
+        "yield",
+        "collect",
+        "merge",
+        "split",
+        "join",
+        "insert",
+        "pop",
+    }
+)
 
 _WORD_RE = re.compile(r"\b([a-zA-Z_][a-zA-Z0-9_]*)\b")
 _COMMENT_CONTENT_RE = re.compile(r"^\s*#\s*(.*?)\s*$")
@@ -334,6 +408,24 @@ def _next_code_line(lines: list[str], after_idx: int) -> str:
     return ""
 
 
+_TOOL_PREFIXES = ("type:", "noqa", "fmt:", "pylint:", "mypy:")
+
+
+def _obvious_comment_positions(lines: list[str]) -> list[int]:
+    positions = []
+    for i, line in enumerate(lines):
+        comment_match = _COMMENT_CONTENT_RE.match(line)
+        if not comment_match:
+            continue
+        comment_text = comment_match.group(1)
+        if comment_text.startswith(_TOOL_PREFIXES):
+            continue
+        next_code = _next_code_line(lines, i)
+        if next_code and _is_obvious_comment(comment_text, next_code):
+            positions.append(i + 1)
+    return positions
+
+
 class ObviousCommentRule(VibRule):
     code = "VIB025"
 
@@ -345,18 +437,15 @@ class ObviousCommentRule(VibRule):
     ) -> list[VibError]:
         if lines is None:
             return []
-        errors: list[VibError] = []
-        for i, line in enumerate(lines):
-            comment_match = _COMMENT_CONTENT_RE.match(line)
-            if not comment_match:
-                continue
-            comment_text = comment_match.group(1)
-            if comment_text.startswith(("type:", "noqa", "fmt:", "pylint:", "mypy:")):
-                continue
-            next_code = _next_code_line(lines, i)
-            if next_code and _is_obvious_comment(comment_text, next_code):
-                errors.append((i + 1, 0, f"VIB025 comment: {random.choice(_OBVIOUS_COMMENT_MESSAGES)}", type(self)))
-        return errors
+        return [
+            (
+                pos,
+                0,
+                f"VIB025 comment: {random.choice(_OBVIOUS_COMMENT_MESSAGES)}",
+                type(self),
+            )
+            for pos in _obvious_comment_positions(lines)
+        ]
 
 
 # ── VIB035 — magic comment ──────────────────────────────────────  # noqa: VIB035

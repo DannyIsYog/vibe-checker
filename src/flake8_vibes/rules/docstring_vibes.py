@@ -119,7 +119,9 @@ class DocstringNoPeriodRule(VibRule):
     ) -> list[VibError]:
         errors: list[VibError] = []
         for node in ast.walk(tree):
-            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            if not isinstance(
+                node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+            ):
                 continue
             doc = _get_any_docstring(node)
             if doc is None:
@@ -173,7 +175,9 @@ def _parse_docstring_args(docstring: str) -> set[str]:
             base_indent = None
             continue
         if in_args:
-            should_break, base_indent = _parse_args_line(line, stripped, args, base_indent)
+            should_break, base_indent = _parse_args_line(
+                line, stripped, args, base_indent
+            )
             if should_break:
                 break
     return args

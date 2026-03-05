@@ -233,6 +233,7 @@ def test_056_messages_list():
 
 # ── VIB057: assigning to _ then using it ─────────────────────────────────────
 
+
 def check_underscore(source: str) -> list:
     return UnderscoreUsedRule().check(ast.parse(textwrap.dedent(source)))
 

@@ -111,12 +111,7 @@ def test_051_no_flag_class_level():
 
 
 def test_051_nested_function_not_double_counted():
-    src = (
-        "def outer():\n"
-        "    def inner():\n"
-        "        import os\n"
-        "    pass\n"
-    )
+    src = "def outer():\n" "    def inner():\n" "        import os\n" "    pass\n"
     # inner import should be flagged once (from inner fn traversal), not twice
     errors = check_in_func(src)
     assert len(errors) == 1
