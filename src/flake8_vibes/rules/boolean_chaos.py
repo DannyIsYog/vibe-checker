@@ -63,14 +63,8 @@ def _check_compare_against(
                 continue
             if _is_const(left, value) or _is_const(right, value):
                 msg = random.choice(messages)
-                errors.append(
-                    (
-                        node.lineno,
-                        node.col_offset,
-                        f"{code} boolean chaos: {msg}",
-                        rule_type,
-                    )
-                )
+                prefix = f"{code} boolean chaos: {msg}"
+                errors.append((node.lineno, node.col_offset, prefix, rule_type))
     return errors
 
 
@@ -135,12 +129,6 @@ class NotEqualsRule(VibRule):
                 continue
             if any(isinstance(op, ast.Eq) for op in node.operand.ops):
                 msg = random.choice(_NOT_EQUALS_MESSAGES)
-                errors.append(
-                    (
-                        node.lineno,
-                        node.col_offset,
-                        f"VIB084 boolean chaos: {msg}",
-                        type(self),
-                    )
-                )
+                prefix = f"VIB084 boolean chaos: {msg}"
+                errors.append((node.lineno, node.col_offset, prefix, type(self)))
         return errors

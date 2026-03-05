@@ -141,17 +141,7 @@ def _format_json(errors_by_file: dict[str, list[VibError]]) -> str:
     return json.dumps(violations)
 
 
-def _build_arg_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="vibe-check",
-        description="Check the vibes of your Python code.",
-    )
-    parser.add_argument(
-        "path",
-        nargs="?",
-        default=".",
-        help="File or directory to check (default: current directory)",
-    )
+def _add_optional_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--threshold",
         type=int,
@@ -165,6 +155,20 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--json", action="store_true", help="Output violations as a JSON array"
     )
+
+
+def _build_arg_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="vibe-check",
+        description="Check the vibes of your Python code.",
+    )
+    parser.add_argument(
+        "path",
+        nargs="?",
+        default=".",
+        help="File or directory to check (default: current directory)",
+    )
+    _add_optional_args(parser)
     return parser
 
 
