@@ -31,9 +31,9 @@ _PLACEHOLDER_NAME_MESSAGES = [
 
 _NEW_PREFIX_MESSAGES = [
     "`{name}` implies there's an `old_` version nearby. there isn't.",
-    "the `new_` prefix means you had an `old_` and didn't clean up.",
+    "`{name}` — the `new_` prefix means you had an `old_` and didn't clean up.",
     "`{name}` — temporal naming is not naming.",
-    "if you need `new_` to tell it apart, you have two things and one idea.",
+    "`{name}` — if you need `new_` to tell it apart, you have two things and one idea.",
 ]
 
 _COPY_SUFFIX_MESSAGES = [
