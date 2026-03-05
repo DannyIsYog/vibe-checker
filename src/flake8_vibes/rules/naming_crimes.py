@@ -79,7 +79,9 @@ def _loop_and_comp_positions(tree: ast.AST) -> set[tuple[int, int]]:
         targets: list[ast.expr] = []
         if isinstance(node, ast.For):
             targets.append(node.target)
-        elif isinstance(node, (ast.ListComp, ast.SetComp, ast.GeneratorExp, ast.DictComp)):
+        elif isinstance(
+            node, (ast.ListComp, ast.SetComp, ast.GeneratorExp, ast.DictComp)
+        ):
             for gen in node.generators:
                 targets.append(gen.target)
         for t in targets:
@@ -114,7 +116,12 @@ class GodVariableRule(VibRule):
             if node.id in _GOD_NAMES:
                 msg = random.choice(_GOD_VARIABLE_MESSAGES).format(name=node.id)
                 errors.append(
-                    (node.lineno, node.col_offset, f"VIB013 naming crime: {msg}", type(self))
+                    (
+                        node.lineno,
+                        node.col_offset,
+                        f"VIB013 naming crime: {msg}",
+                        type(self),
+                    )
                 )
         return errors
 
@@ -135,7 +142,12 @@ class SingleLetterRule(VibRule):
                 if (node.lineno, node.col_offset) not in excluded:
                     msg = random.choice(_SINGLE_LETTER_MESSAGES).format(name=node.id)
                     errors.append(
-                        (node.lineno, node.col_offset, f"VIB014 naming crime: {msg}", type(self))
+                        (
+                            node.lineno,
+                            node.col_offset,
+                            f"VIB014 naming crime: {msg}",
+                            type(self),
+                        )
                     )
         return errors
 
@@ -155,7 +167,12 @@ class TempVariableRule(VibRule):
             if any(re.fullmatch(r"temp\d*|tmp\d*", p) for p in parts):
                 msg = random.choice(_PLACEHOLDER_NAME_MESSAGES).format(name=node.id)
                 errors.append(
-                    (node.lineno, node.col_offset, f"VIB015 naming crime: {msg}", type(self))
+                    (
+                        node.lineno,
+                        node.col_offset,
+                        f"VIB015 naming crime: {msg}",
+                        type(self),
+                    )
                 )
         return errors
 
@@ -174,7 +191,12 @@ class NewPrefixRule(VibRule):
             if node.id == "new" or node.id.startswith("new_"):
                 msg = random.choice(_NEW_PREFIX_MESSAGES).format(name=node.id)
                 errors.append(
-                    (node.lineno, node.col_offset, f"VIB016 naming crime: {msg}", type(self))
+                    (
+                        node.lineno,
+                        node.col_offset,
+                        f"VIB016 naming crime: {msg}",
+                        type(self),
+                    )
                 )
         return errors
 
@@ -193,7 +215,12 @@ class CopySuffixRule(VibRule):
             if re.search(r"_\d+$|_copy$", node.id):
                 msg = random.choice(_COPY_SUFFIX_MESSAGES).format(name=node.id)
                 errors.append(
-                    (node.lineno, node.col_offset, f"VIB017 naming crime: {msg}", type(self))
+                    (
+                        node.lineno,
+                        node.col_offset,
+                        f"VIB017 naming crime: {msg}",
+                        type(self),
+                    )
                 )
         return errors
 
@@ -212,7 +239,12 @@ class FinalVariableRule(VibRule):
             if "final" in node.id.lower().split("_"):
                 msg = random.choice(_OVERCONFIDENT_NAME_MESSAGES).format(name=node.id)
                 errors.append(
-                    (node.lineno, node.col_offset, f"VIB018 naming crime: {msg}", type(self))
+                    (
+                        node.lineno,
+                        node.col_offset,
+                        f"VIB018 naming crime: {msg}",
+                        type(self),
+                    )
                 )
         return errors
 
@@ -231,7 +263,12 @@ class FlagVariableRule(VibRule):
             if "flag" in node.id.lower().split("_"):
                 msg = random.choice(_OPAQUE_BOOL_MESSAGES).format(name=node.id)
                 errors.append(
-                    (node.lineno, node.col_offset, f"VIB019 naming crime: {msg}", type(self))
+                    (
+                        node.lineno,
+                        node.col_offset,
+                        f"VIB019 naming crime: {msg}",
+                        type(self),
+                    )
                 )
         return errors
 
@@ -251,6 +288,11 @@ class VagueClassRule(VibRule):
                 if "manager" in _name_words(node.name):
                     msg = random.choice(_VAGUE_CLASS_MESSAGES).format(name=node.name)
                     errors.append(
-                        (node.lineno, node.col_offset, f"VIB020 naming crime: {msg}", type(self))
+                        (
+                            node.lineno,
+                            node.col_offset,
+                            f"VIB020 naming crime: {msg}",
+                            type(self),
+                        )
                     )
         return errors

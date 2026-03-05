@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import ast
 
-from flake8_vibes.rules.todo_shame import TodoShameRule, _MESSAGES
+from flake8_vibes.rules.todo_shame import _MESSAGES, TodoShameRule
 
 
 def check(source: str) -> list:

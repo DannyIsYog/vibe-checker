@@ -64,10 +64,31 @@ def test_check_file_thursday_violation(tmp_path: Path, monkeypatch: pytest.Monke
         "flake8_vibes.rules.thursday_energy._is_thursday", lambda _: True
     )
     names = [
-        "alpha", "bravo", "charlie", "delta", "echo", "foxtrot", "golf", "hotel",
-        "india", "juliet", "kilo", "lima", "mike", "november", "oscar", "papa",
-        "quebec", "romeo", "sierra", "tango", "uniform", "victor", "whiskey",
-        "xray", "yankee",
+        "alpha",
+        "bravo",
+        "charlie",
+        "delta",
+        "echo",
+        "foxtrot",
+        "golf",
+        "hotel",
+        "india",
+        "juliet",
+        "kilo",
+        "lima",
+        "mike",
+        "november",
+        "oscar",
+        "papa",
+        "quebec",
+        "romeo",
+        "sierra",
+        "tango",
+        "uniform",
+        "victor",
+        "whiskey",
+        "xray",
+        "yankee",
     ]
     body = "\n".join(f"    {name} = {i}" for i, name in enumerate(names))
     f = tmp_path / "big.py"
@@ -245,6 +266,7 @@ def test_main_json_has_violations(
     main()
     captured = capsys.readouterr()
     import json as _json
+
     violations = _json.loads(captured.out)
     assert len(violations) >= 1
     assert "line" in violations[0]
@@ -266,6 +288,7 @@ def test_main_json_is_valid_json(
     main()
     captured = capsys.readouterr()
     import json as _json
+
     parsed = _json.loads(captured.out)
     assert isinstance(parsed, list)
 

@@ -3,14 +3,14 @@ from __future__ import annotations
 import ast
 
 from flake8_vibes.rules.boolean_chaos import (
-    EqualsFalseRule,
-    EqualsNoneRule,
-    EqualsTrueRule,
-    NotEqualsRule,
     _EQUALS_FALSE_MESSAGES,
     _EQUALS_NONE_MESSAGES,
     _EQUALS_TRUE_MESSAGES,
     _NOT_EQUALS_MESSAGES,
+    EqualsFalseRule,
+    EqualsNoneRule,
+    EqualsTrueRule,
+    NotEqualsRule,
     _is_const,
 )
 
@@ -36,6 +36,7 @@ def check_not_eq(source: str) -> list:
 
 
 # --- VIB081: == True ---
+
 
 def test_flags_equals_true():
     errors = check_true("if x == True: pass")
@@ -75,6 +76,7 @@ def test_081_messages_list():
 
 # --- VIB082: == False ---
 
+
 def test_flags_equals_false():
     errors = check_false("if x == False: pass")
     assert len(errors) == 1
@@ -108,6 +110,7 @@ def test_082_messages_list():
 
 
 # --- VIB083: == None ---
+
 
 def test_flags_equals_none():
     errors = check_none("if x == None: pass")
@@ -149,6 +152,7 @@ def test_083_messages_list():
 
 # --- VIB084: not x == y ---
 
+
 def test_flags_not_x_eq_y():
     errors = check_not_eq("if not x == y: pass")
     assert len(errors) == 1
@@ -184,6 +188,7 @@ def test_084_messages_list():
 
 
 # --- _is_const helper ---
+
 
 def test_is_const_true():
     node = ast.Constant(value=True)

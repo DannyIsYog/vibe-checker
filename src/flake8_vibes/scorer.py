@@ -25,11 +25,17 @@ class VibeReport:
     @property
     def verdict(self) -> str:
         if self.score >= 90:
-            return random.choice(["she ate and left no crumbs", "slaying", "immaculate", "serving"])
+            return random.choice(
+                ["she ate and left no crumbs", "slaying", "immaculate", "serving"]
+            )
         elif self.score >= 70:
-            return random.choice(["decent energy", "not bad not great", "it's giving something"])
+            return random.choice(
+                ["decent energy", "not bad not great", "it's giving something"]
+            )
         elif self.score >= 50:
-            return random.choice(["concerning", "the vibes are questionable", "we need to talk"])
+            return random.choice(
+                ["concerning", "the vibes are questionable", "we need to talk"]
+            )
         elif self.score >= 25:
             return random.choice(["chaotic", "this is a cry for help", "bestie no"])
         else:

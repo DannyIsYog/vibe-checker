@@ -3,6 +3,14 @@ from __future__ import annotations
 import ast
 
 from flake8_vibes.rules.naming_crimes import (
+    _COPY_SUFFIX_MESSAGES,
+    _GOD_VARIABLE_MESSAGES,
+    _NEW_PREFIX_MESSAGES,
+    _OPAQUE_BOOL_MESSAGES,
+    _OVERCONFIDENT_NAME_MESSAGES,
+    _PLACEHOLDER_NAME_MESSAGES,
+    _SINGLE_LETTER_MESSAGES,
+    _VAGUE_CLASS_MESSAGES,
     CopySuffixRule,
     FinalVariableRule,
     FlagVariableRule,
@@ -11,14 +19,6 @@ from flake8_vibes.rules.naming_crimes import (
     SingleLetterRule,
     TempVariableRule,
     VagueClassRule,
-    _COPY_SUFFIX_MESSAGES,
-    _OPAQUE_BOOL_MESSAGES,
-    _OVERCONFIDENT_NAME_MESSAGES,
-    _GOD_VARIABLE_MESSAGES,
-    _NEW_PREFIX_MESSAGES,
-    _SINGLE_LETTER_MESSAGES,
-    _PLACEHOLDER_NAME_MESSAGES,
-    _VAGUE_CLASS_MESSAGES,
     _loop_and_comp_positions,
     _name_words,
 )
@@ -61,6 +61,7 @@ def check_020(source: str) -> list:
 
 
 # --- VIB013: God variable ---
+
 
 def test_013_flags_data():
     errors = check_013("data = {}")
@@ -105,6 +106,7 @@ def test_013_messages_list():
 
 
 # --- VIB014: Single-letter variables outside loops ---
+
 
 def test_014_flags_single_letter_assignment():
     errors = check_014("x = 1")
@@ -154,6 +156,7 @@ def test_014_messages_list():
 
 
 # --- VIB015: temp anything ---
+
 
 def test_015_flags_temp():
     errors = check_015("temp = 1")
@@ -211,6 +214,7 @@ def test_015_messages_list():
 
 # --- VIB016: new_ prefix ---
 
+
 def test_016_flags_new_prefix():
     errors = check_016("new_value = 1")
     assert len(errors) == 1
@@ -247,6 +251,7 @@ def test_016_messages_list():
 
 
 # --- VIB017: _2 or _copy suffix ---
+
 
 def test_017_flags_number_suffix():
     errors = check_017("handler_2 = fn()")
@@ -288,6 +293,7 @@ def test_017_messages_list():
 
 
 # --- VIB018: final in variable name ---
+
 
 def test_018_flags_bare_final():
     errors = check_018("final = compute()")
@@ -333,6 +339,7 @@ def test_018_messages_list():
 
 # --- VIB019: flag variable name ---
 
+
 def test_019_flags_bare_flag():
     errors = check_019("flag = True")
     assert len(errors) == 1
@@ -373,6 +380,7 @@ def test_019_messages_list():
 
 
 # --- VIB020: Manager class ---
+
 
 def test_020_flags_manager_class():
     errors = check_020("class UserManager: pass")
@@ -425,6 +433,7 @@ def test_020_messages_list():
 
 
 # --- helper tests ---
+
 
 def test_loop_and_comp_positions_for_loop():
     tree = ast.parse("for i in range(10): pass")

@@ -42,7 +42,8 @@ def test_plugin_run_output_format(monkeypatch: pytest.MonkeyPatch):
 
 def test_no_duplicate_rule_codes():
     codes = [r.code for r in ALL_RULES]
-    assert len(codes) == len(set(codes)), f"duplicate codes: {set(c for c in codes if codes.count(c) > 1)}"
+    dupes = {c for c in codes if codes.count(c) > 1}
+    assert len(codes) == len(set(codes)), f"duplicate codes: {dupes}"
 
 
 def test_vib_rule_base_raises():

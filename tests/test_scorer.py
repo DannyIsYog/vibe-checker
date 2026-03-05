@@ -38,14 +38,14 @@ def test_score_multiple_rules():
     ("violations", "expected_tier"),
     [
         (0, TIER_90),
-        (2, TIER_90),   # score=90
-        (3, TIER_70),   # score=85
-        (6, TIER_70),   # score=70
-        (7, TIER_50),   # score=65
+        (2, TIER_90),  # score=90
+        (3, TIER_70),  # score=85
+        (6, TIER_70),  # score=70
+        (7, TIER_50),  # score=65
         (10, TIER_50),  # score=50
         (11, TIER_25),  # score=45
         (15, TIER_25),  # score=25
-        (16, TIER_0),   # score=20
+        (16, TIER_0),  # score=20
         (100, TIER_0),  # score=0
     ],
 )
