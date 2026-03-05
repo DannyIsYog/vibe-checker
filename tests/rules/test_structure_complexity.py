@@ -9,14 +9,14 @@ from flake8_vibes.rules.structure_complexity import (
     _EMPTY_EXCEPT_MESSAGES,
     _TOO_MANY_ARGS_MESSAGES,
     _TOO_MANY_RETURNS_MESSAGES,
-    _count_args,
-    _count_returns,
-    _find_deep_nesting,
     BareExceptRule,
     DeepNestingRule,
     EmptyExceptRule,
     TooManyArgsRule,
     TooManyReturnsRule,
+    _count_args,
+    _count_returns,
+    _find_deep_nesting,
 )
 
 
