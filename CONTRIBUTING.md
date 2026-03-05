@@ -32,14 +32,14 @@ flake8-vibes/
 │       └── rules/
 │           ├── __init__.py      # re-exports all rules
 │           ├── base.py          # VibRule base class
-│           └── thursday_energy.py
+│           └── calendar_crimes.py
 ├── tests/
 │   ├── conftest.py              # shared fixtures
 │   ├── test_plugin.py           # integration tests via Flake8 API
 │   ├── test_cli.py
 │   ├── test_scorer.py
 │   └── rules/
-│       └── test_thursday_energy.py
+│       └── test_calendar_crimes.py
 ├── pyproject.toml
 ├── README.md
 └── CONTRIBUTING.md
@@ -186,7 +186,7 @@ def check(node: ast.FunctionDef, lines: list[str]) -> list[tuple[int, int, str, 
 
 ### Files
 
-- Snake case: `thursday_energy.py`, not `ThursdayEnergy.py`
+- Snake case: `calendar_crimes.py`, not `ThursdayEnergy.py`
 - One rule per file, file name matches rule name exactly
 
 ### Classes
@@ -236,7 +236,7 @@ Use the AST directly where possible. Do not shell out to Flake8 in unit tests.
 ```python
 import ast
 import textwrap
-from flake8_vibes.rules.thursday_energy import ThursdayEnergy
+from flake8_vibes.rules.calendar_crimes import ThursdayEnergy
 
 
 def parse(source: str) -> ast.Module:
@@ -244,7 +244,7 @@ def parse(source: str) -> ast.Module:
 
 
 def test_flags_long_function_on_thursday(monkeypatch):
-    monkeypatch.setattr("flake8_vibes.rules.thursday_energy.is_thursday", lambda: True)
+    monkeypatch.setattr("flake8_vibes.rules.calendar_crimes.is_thursday", lambda: True)
     source = "def f():\n" + "    pass\n" * 25
     tree = parse(source)
     errors = ThursdayEnergy().check(tree)
@@ -253,7 +253,7 @@ def test_flags_long_function_on_thursday(monkeypatch):
 
 
 def test_does_not_flag_short_function_on_thursday(monkeypatch):
-    monkeypatch.setattr("flake8_vibes.rules.thursday_energy.is_thursday", lambda: True)
+    monkeypatch.setattr("flake8_vibes.rules.calendar_crimes.is_thursday", lambda: True)
     source = "def f():\n    return 1\n"
     tree = parse(source)
     errors = ThursdayEnergy().check(tree)
@@ -261,7 +261,7 @@ def test_does_not_flag_short_function_on_thursday(monkeypatch):
 
 
 def test_does_not_flag_long_function_on_wednesday(monkeypatch):
-    monkeypatch.setattr("flake8_vibes.rules.thursday_energy.is_thursday", lambda: False)
+    monkeypatch.setattr("flake8_vibes.rules.calendar_crimes.is_thursday", lambda: False)
     source = "def f():\n" + "    pass\n" * 25
     tree = parse(source)
     errors = ThursdayEnergy().check(tree)

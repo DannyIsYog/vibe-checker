@@ -1325,3 +1325,705 @@ def validate(config):
 VIB099 misc: `sys.exit()` in library code exits the entire process. that's the caller's call to make.
 ```
 
+---
+
+## `VIB007` — reraise-no-log
+
+**Severity:** warning
+
+Re-raising an exception inside an `except` block without logging first swallows the evidence. The caller will know something went wrong. They will not know why. Log before you re-raise.
+
+```python
+# Bad
+try:
+    connect()
+except ConnectionError:
+    raise
+
+# Good
+try:
+    connect()
+except ConnectionError:
+    logger.error("connection failed", exc_info=True)
+    raise
+```
+
+```
+VIB007 exception: silent re-raise — the exception is going somewhere. what happened here stays a secret.
+```
+
+---
+
+## `VIB012` — console-log-in-py
+
+**Severity:** warning
+
+`console.log()` is JavaScript. This is a Python file. Whoever wrote this was in the wrong tab. Or the wrong language.
+
+```python
+# Bad
+console.log(response)
+
+# Good
+print(response)  # or better: use logging
+```
+
+```
+VIB012 debug: `console.log` is JavaScript's cry for help. this is Python. we have `print()`.
+```
+
+---
+
+## `VIB025` — obvious-comment
+
+**Severity:** warning
+
+A comment that says exactly what the next line of code says is not documentation. It's a subtitle for people who can't read Python. If the code isn't clear enough, rename the variable or the function — don't annotate it.
+
+```python
+# Bad
+# increment counter
+counter += 1
+
+# Good
+counter += 1
+```
+
+```
+VIB025 comment: the comment just says what the code says. one of them is redundant. delete the comment.
+```
+
+---
+
+## `VIB035` — magic-comment
+
+**Severity:** warning
+
+A `# magic` comment is a confession that something works and nobody knows why. That's not a feature. That's a bug with good PR timing. If it needs the label "magic", it needs a rewrite.
+
+```python
+# Bad
+result = value << 2  # magic
+
+# Good
+result = value * 4  # multiply by 4 to convert from units to pixels
+```
+
+```
+VIB035 comment: a magic-tagged comment is not documentation. it is a confession.
+```
+
+---
+
+## `VIB041` — magic-number
+
+**Severity:** warning
+
+A bare integer in a comparison or arithmetic expression tells you the number but not the meaning. `>= 5` means nothing. `>= MAX_RETRIES` means everything. Name your numbers.
+
+```python
+# Bad
+if attempts >= 5:
+    raise TimeoutError()
+
+# Good
+MAX_RETRIES = 5
+if attempts >= MAX_RETRIES:
+    raise TimeoutError()
+```
+
+```
+VIB041 hardcoding: magic number 5: a constant that knows its value but not its purpose.
+```
+
+---
+
+## `VIB042` — hardcoded-url
+
+**Severity:** warning
+
+A URL in source code is infrastructure pretending to be a constant. When the URL changes — and it will — you'll find every hardcoded copy the hard way.
+
+```python
+# Bad
+API_ENDPOINT = "https://api.example.com/v1"
+
+# Good
+API_ENDPOINT = os.environ["API_ENDPOINT"]
+```
+
+```
+VIB042 hardcoding: hardcoded URL detected. when it changes — and it will — you'll find every copy the hard way.
+```
+
+---
+
+## `VIB043` — hardcoded-port
+
+**Severity:** warning
+
+Hardcoded port numbers break across environments, survive past the service they were written for, and are always in the wrong place when ops needs to change them. Put them in config.
+
+```python
+# Bad
+server.listen(8080)
+
+# Good
+server.listen(int(os.environ.get("PORT", "8080")))
+```
+
+```
+VIB043 hardcoding: port 8080 is hardcoded. configs are for configs. source is for logic.
+```
+
+---
+
+## `VIB044` — hardcoded-path
+
+**Severity:** warning
+
+A hardcoded filesystem path works on exactly one machine. Probably yours. `/home/alice/` is not a configuration. It is a biographical detail that should not be in the codebase.
+
+```python
+# Bad
+config_path = "/home/alice/config/settings.json"
+
+# Good
+config_path = Path.home() / "config" / "settings.json"
+```
+
+```
+VIB044 hardcoding: hardcoded path detected. that directory exists on one machine. probably yours.
+```
+
+---
+
+## `VIB045` — hardcoded-timeout
+
+**Severity:** warning
+
+`time.sleep(30)` is a guess dressed as precision. What does 30 seconds mean here? What changes when the infrastructure gets faster or slower? Name the constant. Document the choice.
+
+```python
+# Bad
+time.sleep(30)
+requests.get(url, timeout=10)
+
+# Good
+RETRY_WAIT_SECONDS = 30
+time.sleep(RETRY_WAIT_SECONDS)
+```
+
+```
+VIB045 hardcoding: `time.sleep(30)` is an apology written in seconds. extract it to a constant.
+```
+
+---
+
+## `VIB046` — hardcoded-credentials
+
+**Severity:** warning
+
+A string literal assigned to `password`, `secret`, `api_key`, or similar is a credential that has just been committed to the repo. Rotate it. Move it to env vars. Never do this again.
+
+```python
+# Bad
+api_key = "sk-abc123real"
+
+# Good
+api_key = os.environ["API_KEY"]
+```
+
+```
+VIB046 hardcoding: string assigned to `api_key`. credentials in source are credentials that have already leaked.
+```
+
+---
+
+## `VIB047` — hardcoded-localhost
+
+**Severity:** warning
+
+`localhost` hardcoded in source works in exactly one environment: yours. The cloud is not your localhost. CI is not your localhost. Put the host in config.
+
+```python
+# Bad
+db_host = "localhost"
+
+# Good
+db_host = os.environ.get("DB_HOST", "localhost")
+```
+
+```
+VIB047 hardcoding: `localhost` hardcoded: config files exist for exactly this kind of assumption.
+```
+
+---
+
+## `VIB049` — unused-import
+
+**Severity:** warning
+
+An unused import is a dependency that adds overhead and describes nothing. If you imported it and never called it, delete it. If you're keeping it for re-export, put it in `__all__`.
+
+```python
+# Bad
+import json
+import os  # never used
+
+def process():
+    return json.loads(data)
+
+# Good
+import json
+
+def process():
+    return json.loads(data)
+```
+
+```
+VIB049 import: found unused import `os`. it's taking up space and contributing nothing. like a bad variable.
+```
+
+---
+
+## `VIB050` — dead-future-import
+
+**Severity:** warning
+
+`from __future__ import print_function` and its siblings are no-ops in Python 3. They were migration scaffolding from 2008. The migration is over. Remove them.
+
+```python
+# Bad
+from __future__ import print_function, unicode_literals
+
+# Good
+# (nothing — Python 3 already has all of this)
+```
+
+```
+VIB050 import: `from __future__ import print_function` does nothing in Python 3. it's cargo cult from the migration.
+```
+
+---
+
+## `VIB052` — import-os-for-path
+
+**Severity:** warning
+
+`import os` to use `os.path` is importing a kitchen to use one drawer. `pathlib.Path` has been in the standard library since 3.4 and it's better in every measurable way.
+
+```python
+# Bad
+import os
+
+config = os.path.join(base_dir, "config.json")
+
+# Good
+from pathlib import Path
+
+config = Path(base_dir) / "config.json"
+```
+
+```
+VIB052 import: `import os` to use `os.path` — `from pathlib import Path` has been right there the whole time.
+```
+
+---
+
+## `VIB057` — underscore-used
+
+**Severity:** warning
+
+`_` means "I don't need this". If you assigned to `_` and then read from it, you lied to the reader. Use a real variable name.
+
+```python
+# Bad
+_ = fetch_result()
+process(_)
+
+# Good
+unused_result = fetch_result()
+process(unused_result)
+```
+
+```
+VIB057 return: you assigned to `_` to signal you don't need it, then used it anyway. pick a side.
+```
+
+---
+
+## `VIB058` — str-returns-dict
+
+**Severity:** warning
+
+A `__str__` that returns `self.__dict__` is not a string representation. It is a data dump. Write a string that means something to a human, not a debugging printout.
+
+```python
+# Bad
+def __str__(self):
+    return str(self.__dict__)
+
+# Good
+def __str__(self):
+    return f"User(name={self.name}, id={self.id})"
+```
+
+```
+VIB058 class: `__str__` that dumps `self.__dict__` is a class that overshares. write a real string.
+```
+
+---
+
+## `VIB059` — empty-except-in-del
+
+**Severity:** warning
+
+`__del__` with `except: pass` is a destructor that swallows every error during cleanup. You will never know what broke. The object died with its secrets.
+
+```python
+# Bad
+def __del__(self):
+    try:
+        self.close()
+    except:
+        pass
+
+# Good
+def __del__(self):
+    try:
+        self.close()
+    except Exception:
+        logger.warning("cleanup failed", exc_info=True)
+```
+
+```
+VIB059 class: `__del__` with an empty `except` is a destructor that swallows its own errors. impressive.
+```
+
+---
+
+## `VIB060` — class-no-docstring
+
+**Severity:** warning
+
+A class over 100 lines long with no docstring has committed to doing a lot while explaining nothing. At that size, someone is going to need to understand what it does. Write the docstring.
+
+```python
+# Bad
+class UserAuthenticationHandler:
+    # 120 lines of uncommented code
+
+# Good
+class UserAuthenticationHandler:
+    """Handles OAuth2 token validation and session management."""
+    # 120 lines of code
+```
+
+```
+VIB060 class: `UserAuthenticationHandler` has 120 lines and no docstring. whatever this does, it hasn't introduced itself.
+```
+
+---
+
+## `VIB061` — super-init-not-called
+
+**Severity:** warning
+
+Inheriting from a class and not calling `super().__init__()` skips whatever the parent sets up. If you're sure the parent's init does nothing useful, you're probably wrong.
+
+```python
+# Bad
+class MyWidget(BaseWidget):
+    def __init__(self, name):
+        self.name = name  # BaseWidget.__init__ never runs
+
+# Good
+class MyWidget(BaseWidget):
+    def __init__(self, name):
+        super().__init__()
+        self.name = name
+```
+
+```
+VIB061 class: `__init__` in `MyWidget` doesn't call `super().__init__()`. the parent class has feelings too.
+```
+
+---
+
+## `VIB062` — no-op-override
+
+**Severity:** warning
+
+Overriding a method only to call `super().method(...)` unchanged is noise. You're not modifying behavior. You're not adding a hook. You're just taking up space. Delete it and inherit directly.
+
+```python
+# Bad
+class MyHandler(BaseHandler):
+    def process(self, request):
+        return super().process(request)
+
+# Good
+class MyHandler(BaseHandler):
+    pass  # or just don't override it
+```
+
+```
+VIB062 class: `process` is a one-line override that calls super unchanged. delete it and inherit directly.
+```
+
+---
+
+## `VIB064` — monday-motivation
+
+**Severity:** warning
+
+A function under 3 lines written on a Monday is suspicious. The week just started. This might be a stub that will never get finished, or cut corners that will never be revisited.
+
+```python
+# Bad (committed on a Monday, 2 lines long)
+def validate_user(user):
+    return user
+```
+
+```
+VIB064 calendar: monday energy in 'validate_user' (2 lines). this is either elegant or a stub. we know which.
+```
+
+---
+
+## `VIB065` — friday-deploy
+
+**Severity:** warning
+
+This file was last committed on a Friday. The weekend is a diff review nobody wanted. Whatever ships today ships without a safety net.
+
+```
+VIB065 calendar: committed on a Friday. we hope the oncall is someone else.
+```
+
+---
+
+## `VIB067` — december-code
+
+**Severity:** warning
+
+This file was last modified in December. Half the team was off, the other half was thinking about being off. Holiday deadlines are real and this code paid the price.
+
+```
+VIB067 calendar: december commit: half the team was off, the other half was thinking about being off.
+```
+
+---
+
+## `VIB073` — copy-pasted-test
+
+**Severity:** warning
+
+Two test functions with identical bodies are one test with an identity crisis. Either they test different things and the bodies should differ, or one of them can be deleted.
+
+```python
+# Bad
+def test_user_valid():
+    assert validate(user) is True
+
+def test_user_invalid():
+    assert validate(user) is True  # same body — copy-paste
+
+# Good
+def test_user_valid():
+    assert validate(valid_user) is True
+
+def test_user_invalid():
+    assert validate(invalid_user) is False
+```
+
+```
+VIB073 test: `test_user_invalid` has the same body as another test. that's not a second test, it's a copy.
+```
+
+---
+
+## `VIB080` — multiline-string-as-comment
+
+**Severity:** warning
+
+A triple-quoted string that isn't a docstring is a comment pretending to be data. Python won't optimize it away in all cases, and it signals confusion about intent. Use `#` for comments.
+
+```python
+# Bad
+def process():
+    """
+    This is not a docstring, it's just a big comment block
+    explaining what happens next.
+    """
+    do_something()
+
+# Good
+def process():
+    # this is what happens next:
+    # ...
+    do_something()
+```
+
+```
+VIB080 string: orphaned triple-quoted string — if it's a comment, use `#`. if it's a docstring, put it at the top.
+```
+
+---
+
+## `VIB085` — docstring-repeats-name
+
+**Severity:** warning
+
+A docstring that just restates the function name in sentence form adds nothing. If `get_user` has a docstring that says "gets the user", you've written words without information.
+
+```python
+# Bad
+def get_user(user_id):
+    """Get user."""
+    return db.query(user_id)
+
+# Good
+def get_user(user_id):
+    """Return the User record for the given ID, or None if not found."""
+    return db.query(user_id)
+```
+
+```
+VIB085 docstring: `get_user` has a docstring that just says `get_user` with different grammar. it adds nothing.
+```
+
+---
+
+## `VIB086` — docstring-no-period
+
+**Severity:** warning
+
+A docstring summary line without a terminal period is a sentence that didn't commit to being one. Finish your sentences.
+
+```python
+# Bad
+def connect():
+    """Connect to the database"""
+    ...
+
+# Good
+def connect():
+    """Connect to the database."""
+    ...
+```
+
+```
+VIB086 docstring: docstring summary line doesn't end with a period. finish your sentences.
+```
+
+---
+
+## `VIB087` — docstring-args-mismatch
+
+**Severity:** warning
+
+An `Args:` section that documents parameters that don't exist is documentation that lies. Renamed, removed, or imagined parameters in docstrings confuse readers and signal that the docs are unmaintained.
+
+```python
+# Bad
+def process(data, timeout):
+    """Process data.
+
+    Args:
+        data: The input.
+        retries: Number of retries.  # parameter doesn't exist
+    """
+    ...
+
+# Good
+def process(data, timeout):
+    """Process data.
+
+    Args:
+        data: The input.
+        timeout: Max seconds to wait.
+    """
+    ...
+```
+
+```
+VIB087 docstring: the Args section in `process`'s docstring lists `retries` which isn't a real parameter.
+```
+
+---
+
+## `VIB088` — docstring-longer-than-function
+
+**Severity:** warning
+
+When the docstring is longer than the function body, the documentation has outrun the code. Either the function does too little for the explanation it demands, or the explanation is too long for the function it describes.
+
+```python
+# Bad
+def greet(name):
+    """
+    Return a greeting string for the given name.
+
+    This function takes a name parameter and returns a personalized
+    greeting message. The greeting follows standard formatting conventions
+    and is suitable for display in user interfaces.
+    """
+    return f"Hello, {name}."
+
+# Good
+def greet(name):
+    """Return a greeting string for the given name."""
+    return f"Hello, {name}."
+```
+
+```
+VIB088 docstring: `greet` has a 7-line docstring and a 1-line body. the documentation outran the code.
+```
+
+---
+
+## `VIB093` — all-exports-private
+
+**Severity:** warning
+
+A name starting with `_` is private by convention. Including it in `__all__` is a contradiction. You're exporting something you marked private. Pick one.
+
+```python
+# Bad
+__all__ = ["PublicThing", "_InternalHelper"]
+
+# Good
+__all__ = ["PublicThing"]
+```
+
+```
+VIB093 misc: found `_InternalHelper` in `__all__`. underscores mean 'not public'. `__all__` means 'public'. pick one.
+```
+
+---
+
+## `VIB100` — zero-star-repo
+
+**Severity:** warning
+
+A file with no functions, no classes, and five or more `print()` calls is not a module. It is a script. Or a learning exercise. Either way, it should not be in your production codebase.
+
+```python
+# Bad (entire file is just):
+print("Starting...")
+print("Loading config...")
+print("Connecting...")
+print("Processing...")
+print("Done.")
+
+# Good
+def main():
+    ...
+```
+
+```
+VIB100 misc: this file has no functions, no classes, and is mostly print statements. that's a script, not a module.
+```
+
