@@ -29,9 +29,11 @@ jobs:
         run: pip install -e ".[dev]"
 
       - name: Format check (black)
+        if: matrix.python-version == '3.13'
         run: black --check src tests
 
       - name: Import order (isort)
+        if: matrix.python-version == '3.13'
         run: isort --check-only src tests
 
       - name: Lint (ruff)
