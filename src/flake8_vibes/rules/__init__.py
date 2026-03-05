@@ -94,7 +94,6 @@ from flake8_vibes.rules.naming_crimes import (
 )
 from flake8_vibes.rules.return_crimes import (
     AssignThenReturnRule,
-    ExplicitReturnNoneRule,
     MutableDefaultArgRule,
     ShadowBuiltinRule,
     UnderscoreUsedRule,
@@ -166,7 +165,6 @@ ALL_RULES: list[type[VibRule]] = [
     ImportInFunctionRule,
     OsPathImportRule,
     # return crimes
-    ExplicitReturnNoneRule,
     AssignThenReturnRule,
     MutableDefaultArgRule,
     ShadowBuiltinRule,

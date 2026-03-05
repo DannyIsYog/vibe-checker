@@ -795,28 +795,6 @@ VIB051 import: importing inside a function delays the problem, it doesn't solve 
 
 ---
 
-## `VIB053` — explicit-return-none
-
-**Severity:** warning
-
-`return None` at the end of a function is redundant. Python already returns `None` when a function ends without a value. A bare `return` is cleaner. Silence is also fine.
-
-```python
-# Bad
-def send_email(address):
-    deliver(address)
-    return None
-
-# Good
-def send_email(address):
-    deliver(address)
-```
-
-```
-VIB053 return: `return None` is the statement of a function that doesn't know how to end gracefully.
-```
-
----
 
 ## `VIB054` — assign-then-return
 

@@ -44,12 +44,9 @@ class LambdaAssignedRule(VibRule):
     ) -> list[VibError]:
         errors: list[VibError] = []
         for node in ast.walk(tree):
-            value: ast.expr | None = None
-            if isinstance(node, ast.Assign):
-                value = node.value
-            elif isinstance(node, ast.AnnAssign):
-                value = node.value
-            if value is not None and isinstance(value, ast.Lambda):
+            if isinstance(node, (ast.Assign, ast.AnnAssign)) and isinstance(
+                node.value, ast.Lambda
+            ):
                 msg = random.choice(_LAMBDA_ASSIGNED_MESSAGES)
                 prefix = f"VIB089 misc: {msg}"
                 errors.append((node.lineno, node.col_offset, prefix, type(self)))

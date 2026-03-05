@@ -3,6 +3,7 @@ from __future__ import annotations
 import ast
 import random
 from collections import deque
+from collections.abc import Generator
 
 from flake8_vibes.rules.base import VibError, VibRule
 
@@ -77,7 +78,7 @@ _IMPORT_IN_FUNCTION_MESSAGES = [
 ]
 
 
-def _walk_no_nested_funcs(node: ast.AST):  # type: ignore[return]  # generator without return annotation
+def _walk_no_nested_funcs(node: ast.AST) -> Generator[ast.AST, None, None]:
     """Walk AST but don't descend into nested function/async-function defs."""
     queue: deque[ast.AST] = deque(ast.iter_child_nodes(node))
     while queue:

@@ -37,7 +37,7 @@ class StringConcatInLoopRule(VibRule):
         for node in ast.walk(tree):
             if isinstance(node, (ast.For, ast.While)):
                 for child in ast.walk(node):
-                    if _is_string_aug_add(child):
+                    if isinstance(child, ast.AugAssign) and _is_string_aug_add(child):
                         msg = random.choice(_STRING_CONCAT_LOOP_MESSAGES)
                         prefix = f"VIB077 string: {msg}"
                         errors.append(

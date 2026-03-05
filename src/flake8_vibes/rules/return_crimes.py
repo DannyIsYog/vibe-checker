@@ -23,38 +23,6 @@ _BUILTINS = {
     "object",
 }
 
-# ── VIB053 — explicit return None ───────────────────────────────────────────
-
-_EXPLICIT_RETURN_NONE_MESSAGES = [
-    "`return None` — you wrote an explicit statement to achieve what silence would have accomplished.",
-    "`return None` is loud about doing nothing. that's a personality flaw in a function.",
-    "`return None` is the statement of a function that doesn't know how to end gracefully.",
-    "`return None` — explicit, deliberate, and exactly what the implicit behavior was going to do anyway.",
-]
-
-
-class ExplicitReturnNoneRule(VibRule):
-    code = "VIB053"
-
-    def check(
-        self,
-        tree: ast.AST,
-        filename: str = "<unknown>",
-        lines: list[str] | None = None,
-    ) -> list[VibError]:
-        errors: list[VibError] = []
-        for node in ast.walk(tree):
-            if (
-                isinstance(node, ast.Return)
-                and node.value is not None
-                and isinstance(node.value, ast.Constant)
-                and node.value.value is None
-            ):
-                msg = random.choice(_EXPLICIT_RETURN_NONE_MESSAGES)
-                prefix = f"VIB053 return: {msg}"
-                errors.append((node.lineno, node.col_offset, prefix, type(self)))
-        return errors
-
 
 # ── VIB054 — assign then immediately return ──────────────────────────────────
 
@@ -197,12 +165,9 @@ def _call_func_ids(tree: ast.AST) -> set[int]:
     return {id(node.func) for node in ast.walk(tree) if isinstance(node, ast.Call)}
 
 
-def _is_used_discard(node: ast.AST, call_funcs: set[int]) -> bool:
+def _is_used_discard(node: ast.Name, call_funcs: set[int]) -> bool:
     return (
-        isinstance(node, ast.Name)
-        and node.id == "_"
-        and isinstance(node.ctx, ast.Load)
-        and id(node) not in call_funcs
+        node.id == "_" and isinstance(node.ctx, ast.Load) and id(node) not in call_funcs
     )
 
 
@@ -220,7 +185,7 @@ class UnderscoreUsedRule(VibRule):
         call_funcs = _call_func_ids(tree)
         errors: list[VibError] = []
         for node in ast.walk(tree):
-            if _is_used_discard(node, call_funcs):
+            if isinstance(node, ast.Name) and _is_used_discard(node, call_funcs):
                 msg = random.choice(_UNDERSCORE_USED_MESSAGES)
                 prefix = f"VIB057 return: {msg}"
                 errors.append((node.lineno, node.col_offset, prefix, type(self)))

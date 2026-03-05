@@ -30,7 +30,7 @@ def _is_magic_int(node: ast.AST) -> int | None:
     ):
         if node.value not in _MAGIC_NUMBER_ALLOWED:
             return node.value
-    return
+    return None
 
 
 def _magic_compare_errors(node: ast.Compare, rule_type: type) -> list[VibError]:
@@ -238,7 +238,7 @@ def _is_numeric_literal(node: ast.AST) -> float | int | None:
         and not isinstance(node.value, bool)
     ):
         return node.value
-    return
+    return None
 
 
 def _check_sleep_call(node: ast.Call, rule_type: type) -> VibError | None:
@@ -249,12 +249,12 @@ def _check_sleep_call(node: ast.Call, rule_type: type) -> VibError | None:
         and node.func.value.id == "time"
         and node.args
     ):
-        return
+        return None
     val = _is_numeric_literal(node.args[0])
     if val is not None and val > 0:
         msg = random.choice(_HARDCODED_TIMEOUT_MESSAGES).format(n=val)
         return (node.lineno, node.col_offset, f"VIB045 hardcoding: {msg}", rule_type)
-    return
+    return None
 
 
 def _check_timeout_kw(node: ast.Call, rule_type: type) -> list[VibError]:

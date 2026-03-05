@@ -18,9 +18,9 @@ def get_file_commit_date(filepath: str) -> datetime | None:
         )
         output = proc.stdout.strip()
         if not output:
-            return
+            return None
         # git format %ai: "2024-01-04 15:30:00 +0000"
         # slice to 19 chars: fromisoformat doesn't handle +0000 on py3.9/3.10
         return datetime.fromisoformat(output[:19])
     except (subprocess.TimeoutExpired, FileNotFoundError, ValueError, OSError):
-        return
+        return None

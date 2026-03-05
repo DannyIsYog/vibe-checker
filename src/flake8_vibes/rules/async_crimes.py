@@ -80,7 +80,7 @@ class AsyncioSleep0Rule(VibRule):
     ) -> list[VibError]:
         errors: list[VibError] = []
         for node in ast.walk(tree):
-            if _is_asyncio_sleep_zero(node):
+            if isinstance(node, ast.Call) and _is_asyncio_sleep_zero(node):
                 msg = random.choice(_ASYNCIO_SLEEP_0_MESSAGES)
                 prefix = f"VIB076 async: {msg}"
                 errors.append((node.lineno, node.col_offset, prefix, type(self)))

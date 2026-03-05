@@ -53,7 +53,7 @@ def _get_docstring(func: ast.FunctionDef | ast.AsyncFunctionDef) -> str | None:
         and isinstance(func.body[0].value.value, str)
     ):
         return func.body[0].value.value
-    return
+    return None
 
 
 class DocstringRepeatsNameRule(VibRule):
@@ -97,7 +97,7 @@ def _get_class_docstring(node: ast.ClassDef) -> str | None:
         and isinstance(node.body[0].value.value, str)
     ):
         return node.body[0].value.value
-    return
+    return None
 
 
 def _get_any_docstring(
@@ -253,12 +253,12 @@ def _check_doc_longer(
 ) -> VibError | None:
     doc = _get_docstring(node)
     if doc is None:
-        return
+        return None
     doc_lines = _count_docstring_lines(doc)
     total_lines = (node.end_lineno or node.lineno) - node.lineno
     body_lines = total_lines - doc_lines
     if body_lines < 1 or doc_lines <= body_lines:
-        return
+        return None
     msg = random.choice(_DOC_LONGER_THAN_FUNC_MESSAGES).format(
         name=node.name, doc_lines=doc_lines, body_lines=body_lines
     )

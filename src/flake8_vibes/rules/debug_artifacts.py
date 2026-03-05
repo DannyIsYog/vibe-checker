@@ -133,7 +133,9 @@ class ImportPdbRule(VibRule):
     ) -> list[VibError]:
         errors: list[VibError] = []
         for node in ast.walk(tree):
-            if _node_imports_pdb(node):
+            if isinstance(node, (ast.Import, ast.ImportFrom)) and _node_imports_pdb(
+                node
+            ):
                 msg = random.choice(_IMPORT_PDB_MESSAGES)
                 prefix = f"VIB011 debug: {msg}"
                 errors.append((node.lineno, node.col_offset, prefix, type(self)))

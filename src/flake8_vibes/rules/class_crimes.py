@@ -198,7 +198,7 @@ _SUPER_INIT_MESSAGES = [
 ]
 
 
-def _has_super_init_call(func: ast.FunctionDef) -> bool:
+def _has_super_init_call(func: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
     for node in ast.walk(func):
         if (
             isinstance(node, ast.Call)

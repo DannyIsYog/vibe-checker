@@ -5,12 +5,10 @@ import textwrap
 
 from flake8_vibes.rules.return_crimes import (
     _ASSIGN_RETURN_MESSAGES,
-    _EXPLICIT_RETURN_NONE_MESSAGES,
     _MUTABLE_DEFAULT_MESSAGES,
     _SHADOW_BUILTIN_MESSAGES,
     _UNDERSCORE_USED_MESSAGES,
     AssignThenReturnRule,
-    ExplicitReturnNoneRule,
     MutableDefaultArgRule,
     ShadowBuiltinRule,
     UnderscoreUsedRule,
@@ -19,10 +17,6 @@ from flake8_vibes.rules.return_crimes import (
 
 def parse(source: str) -> ast.AST:
     return ast.parse(textwrap.dedent(source))
-
-
-def check_return_none(source: str) -> list:
-    return ExplicitReturnNoneRule().check(parse(source))
 
 
 def check_assign_return(source: str) -> list:
@@ -35,44 +29,6 @@ def check_mutable_default(source: str) -> list:
 
 def check_shadow(source: str) -> list:
     return ShadowBuiltinRule().check(parse(source))
-
-
-# ── VIB053: explicit return None ─────────────────────────────────────────────
-
-
-def test_053_flags_explicit_return_none():
-    src = "def foo():\n    return None"
-    errors = check_return_none(src)
-    assert len(errors) == 1
-    assert "VIB053" in errors[0][2]
-
-
-def test_053_no_flag_bare_return():
-    src = "def foo():\n    return"
-    assert check_return_none(src) == []
-
-
-def test_053_no_flag_return_value():
-    src = "def foo():\n    return 42"
-    assert check_return_none(src) == []
-
-
-def test_053_no_flag_return_none_variable():
-    src = "x = None\ndef foo():\n    return x"
-    assert check_return_none(src) == []
-
-
-def test_053_error_tuple_format():
-    src = "def foo():\n    return None"
-    row, col, msg, typ = check_return_none(src)[0]
-    assert isinstance(row, int)
-    assert isinstance(col, int)
-    assert isinstance(msg, str)
-    assert isinstance(typ, type)
-
-
-def test_053_messages_list():
-    assert len(_EXPLICIT_RETURN_NONE_MESSAGES) >= 2
 
 
 # ── VIB054: assign then return ───────────────────────────────────────────────
