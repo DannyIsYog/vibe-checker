@@ -10,3 +10,5 @@ dist/
 build/
 .mypy_cache/
 .ruff_cache/
+improvement.md
+ideas.md
