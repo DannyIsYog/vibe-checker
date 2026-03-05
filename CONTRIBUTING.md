@@ -337,9 +337,9 @@ Add to the `RULES` list in `src/flake8_vibes/plugin.py`. The plugin iterates thi
 
 Create `tests/rules/test_your_rule_name.py`. Must cover: violation, clean case, and at least two edge cases.
 
-### 5. Update the README
+### 5. Update the rules docs
 
-Add the rule to `README.md` with its code, name, rationale, and an example. Follow the existing format.
+Add the rule to `docs/rules.md` with its code, name, rationale, and an example. Follow the existing format.
 
 ### Rule base class contract
 
