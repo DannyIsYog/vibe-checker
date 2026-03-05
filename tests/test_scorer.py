@@ -31,7 +31,14 @@ def test_score_clamps_to_zero():
 def test_score_multiple_rules():
     report = VibeReport(violations_by_rule={"VIB001": 3, "VIB002": 2}, total_files=10)
     assert report.total_violations == 5
-    assert report.score == 75
+    # density = 0.5 violations/file → score = round(100 - 0.5 * 5) = 98
+    assert report.score == 98
+
+
+def test_score_same_violations_more_files_is_better():
+    few_files = VibeReport(violations_by_rule={"VIB001": 5}, total_files=1)
+    many_files = VibeReport(violations_by_rule={"VIB001": 5}, total_files=50)
+    assert many_files.score > few_files.score
 
 
 @pytest.mark.parametrize(

@@ -32,7 +32,10 @@ class VibeReport:
 
     @property
     def score(self) -> int:
-        return max(0, min(_SCORE_MAX, _SCORE_MAX - self.total_violations * _SCORE_PENALTY))
+        if self.total_files == 0:
+            return _SCORE_MAX
+        density = self.total_violations / self.total_files
+        return max(0, min(_SCORE_MAX, round(_SCORE_MAX - density * _SCORE_PENALTY)))
 
     @staticmethod
     def file_score(count: int) -> int:
