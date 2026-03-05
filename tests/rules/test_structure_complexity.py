@@ -285,10 +285,7 @@ def test_033_no_flag_tuple_of_exceptions():
 
 
 def test_033_flags_multiple_bare_excepts():
-    src = (
-        "try:\n    pass\nexcept:\n    pass\n"
-        "try:\n    pass\nexcept:\n    pass"
-    )
+    src = "try:\n    pass\nexcept:\n    pass\n" "try:\n    pass\nexcept:\n    pass"
     errors = check_bare(src)
     assert len(errors) == 2
 
