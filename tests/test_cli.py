@@ -216,6 +216,60 @@ def test_main_quiet(
     assert "Vibe score:" in captured.out
 
 
+def test_main_json_empty(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+):
+    monkeypatch.setattr(
+        "flake8_vibes.rules.thursday_energy._is_thursday", lambda _: False
+    )
+    (tmp_path / "clean.py").write_text("my_variable = 1\n")
+    monkeypatch.setattr(sys, "argv", ["vibe-check", str(tmp_path), "--json"])
+    main()
+    captured = capsys.readouterr()
+    assert captured.out.strip() == "[]"
+
+
+def test_main_json_has_violations(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+):
+    monkeypatch.setattr(
+        "flake8_vibes.rules.thursday_energy._is_thursday", lambda _: True
+    )
+    body = "\n".join(f"    x_{i} = {i}" for i in range(25))
+    (tmp_path / "big.py").write_text(f"def big_fn():\n{body}\n")
+    monkeypatch.setattr(sys, "argv", ["vibe-check", str(tmp_path), "--json"])
+    main()
+    captured = capsys.readouterr()
+    import json as _json
+    violations = _json.loads(captured.out)
+    assert len(violations) >= 1
+    assert "line" in violations[0]
+    assert "code" in violations[0]
+    assert "message" in violations[0]
+
+
+def test_main_json_is_valid_json(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+):
+    monkeypatch.setattr(
+        "flake8_vibes.rules.thursday_energy._is_thursday", lambda _: True
+    )
+    body = "\n".join(f"    x_{i} = {i}" for i in range(25))
+    (tmp_path / "big.py").write_text(f"def big_fn():\n{body}\n")
+    monkeypatch.setattr(sys, "argv", ["vibe-check", str(tmp_path), "--json"])
+    main()
+    captured = capsys.readouterr()
+    import json as _json
+    parsed = _json.loads(captured.out)
+    assert isinstance(parsed, list)
+
+
 def test_main_threshold_exit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(
         "flake8_vibes.rules.thursday_energy._is_thursday", lambda _: True
