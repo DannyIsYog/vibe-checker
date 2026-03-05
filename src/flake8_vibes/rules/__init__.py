@@ -17,12 +17,24 @@ from flake8_vibes.rules.naming_crimes import (
     TempVariableRule,
     VagueClassRule,
 )
+from flake8_vibes.rules.structure_complexity import (
+    BareExceptRule,
+    DeepNestingRule,
+    EmptyExceptRule,
+    TooManyArgsRule,
+    TooManyReturnsRule,
+)
 from flake8_vibes.rules.thursday_energy import ThursdayEnergyRule
 from flake8_vibes.rules.todo_shame import TodoShameRule
 
 ALL_RULES: list[type[VibRule]] = [
     ThursdayEnergyRule,
     TodoShameRule,
+    TooManyArgsRule,
+    DeepNestingRule,
+    TooManyReturnsRule,
+    BareExceptRule,
+    EmptyExceptRule,
     EqualsTrueRule,
     EqualsFalseRule,
     EqualsNoneRule,

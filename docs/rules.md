@@ -227,6 +227,138 @@ VIB020 naming crime: `UserManager` manages something. the question is what.
 
 ---
 
+## `VIB030` — too-many-args
+
+**Severity:** warning
+
+A function that takes more than 5 arguments has stopped being a function and started being a form. The caller must remember six things, in the right order, with the right names. That information wants to live in a dataclass, or a config object, or literally anywhere that has field names and tab completion.
+
+```python
+# Bad
+def create_user(name, email, age, role, is_active, plan, referral_code):
+    ...
+
+# Good
+def create_user(user_data: UserData):
+    ...
+```
+
+```
+VIB030 structure: 'create_user' takes 7 arguments. that's not a function, that's a meeting agenda.
+```
+
+---
+
+## `VIB031` — deep-nesting
+
+**Severity:** warning
+
+Code nested more than 4 levels deep is code that has run out of ideas. Every additional level of indentation is a decision that could have been a function, a guard clause, or a different data structure. The indentation tells you something. Listen to it.
+
+```python
+# Bad
+def process(items):
+    if items:
+        for item in items:
+            if item.active:
+                for sub in item.children:
+                    if sub.valid:  # 5 levels deep
+                        handle(sub)
+
+# Good
+def process(items):
+    active = [i for i in items if i.active]
+    for item in active:
+        _process_children(item)
+```
+
+```
+VIB031 structure: nesting depth 5 detected. your future self will not forgive this.
+```
+
+---
+
+## `VIB032` — too-many-returns
+
+**Severity:** warning
+
+A function with more than 3 return statements has not decided what it is yet. Return statements are exits, and a function with four exits has four different opinions about its own purpose. Pick a lane, or split into multiple functions.
+
+```python
+# Bad
+def classify(x):
+    if x < 0: return "negative"
+    if x == 0: return "zero"
+    if x < 10: return "small"
+    return "large"
+
+# Good
+_BUCKETS = [(-float("inf"), 0, "negative"), (0, 1, "zero"), (1, 10, "small")]
+def classify(x):
+    for lo, hi, label in _BUCKETS:
+        if lo <= x < hi:
+            return label
+    return "large"
+```
+
+```
+VIB032 structure: 'classify' has 4 return statements. pick an exit and commit to it.
+```
+
+---
+
+## `VIB033` — bare-except
+
+**Severity:** warning
+
+`except:` with no exception type catches everything: `ValueError`, `KeyboardInterrupt`, `SystemExit`, and the thing that broke production. A bare `except` is not error handling, it's error concealment. Name the exception you expect, or accept that you're hiding bugs you haven't met yet.
+
+```python
+# Bad
+try:
+    connect()
+except:
+    retry()
+
+# Good
+try:
+    connect()
+except ConnectionError:
+    retry()
+```
+
+```
+VIB033 structure: a bare `except` catches `KeyboardInterrupt`. think about what you've done.
+```
+
+---
+
+## `VIB034` — empty-except
+
+**Severity:** warning
+
+An `except` block containing only `pass` is not error handling. It is a signed confession that you know something can go wrong and you have chosen to ignore it. The exception happened. It deserved better than this.
+
+```python
+# Bad
+try:
+    load_config()
+except FileNotFoundError:
+    pass
+
+# Good
+try:
+    load_config()
+except FileNotFoundError:
+    load_defaults()
+```
+
+```
+VIB034 structure: an except block with only `pass` is a suppressed scream.
+```
+
+---
+
 ## `VIB081` — equals-true
 
 **Severity:** warning

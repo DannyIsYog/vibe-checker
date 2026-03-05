@@ -8,6 +8,8 @@ from flake8_vibes.rules.base import VibError, VibRule
 
 _PATTERN = re.compile(r"#\s*(TODO|FIXME)\b", re.IGNORECASE)
 
+# ── VIB002 — todo-shame ──────────────────────────────────────────────────────
+
 _MESSAGES: dict[str, list[str]] = {
     "TODO": [
         "unresolved TODO left to rot",
@@ -50,12 +52,6 @@ class TodoShameRule(VibRule):
                 tag = match.group(1).upper()
                 col = match.start()
                 msg = _pick_message(tag)
-                errors.append(
-                    (
-                        lineno,
-                        col,
-                        f"VIB002 todo shame: {msg}",
-                        type(self),
-                    )
-                )
+                prefix = f"VIB002 todo shame: {msg}"
+                errors.append((lineno, col, prefix, type(self)))
         return errors

@@ -3,6 +3,19 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass, field
 
+_SCORE_VERDICTS: list[tuple[int, list[str]]] = [
+    (90, ["she ate and left no crumbs", "slaying", "immaculate", "serving"]),
+    (70, ["decent energy", "not bad not great", "it's giving something"]),
+    (50, ["concerning", "the vibes are questionable", "we need to talk"]),
+    (25, ["chaotic", "this is a cry for help", "bestie no"]),
+    (0, ["cooked", "it's giving dumpster fire", "expired"]),
+]
+
+
+def score_to_verdict(score: int) -> str:
+    options = next(opts for threshold, opts in _SCORE_VERDICTS if score >= threshold)
+    return random.choice(options)
+
 
 @dataclass
 class VibeReport:
@@ -24,19 +37,4 @@ class VibeReport:
 
     @property
     def verdict(self) -> str:
-        if self.score >= 90:
-            return random.choice(
-                ["she ate and left no crumbs", "slaying", "immaculate", "serving"]
-            )
-        elif self.score >= 70:
-            return random.choice(
-                ["decent energy", "not bad not great", "it's giving something"]
-            )
-        elif self.score >= 50:
-            return random.choice(
-                ["concerning", "the vibes are questionable", "we need to talk"]
-            )
-        elif self.score >= 25:
-            return random.choice(["chaotic", "this is a cry for help", "bestie no"])
-        else:
-            return random.choice(["cooked", "it's giving dumpster fire", "expired"])
+        return score_to_verdict(self.score)

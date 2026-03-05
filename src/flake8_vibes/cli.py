@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 from flake8_vibes.rules import ALL_RULES, VibError
-from flake8_vibes.scorer import VibeReport
+from flake8_vibes.scorer import VibeReport, score_to_verdict
 
 _RESET = "\033[0m"
 _BOLD = "\033[1m"
@@ -30,21 +30,7 @@ def _score_color(score: int) -> str:
 
 
 def _file_verdict(score: int) -> str:
-    if score >= 90:
-        return random.choice(
-            ["she ate and left no crumbs", "slaying", "immaculate", "serving"]
-        )
-    if score >= 70:
-        return random.choice(
-            ["decent energy", "not bad not great", "it's giving something"]
-        )
-    if score >= 50:
-        return random.choice(
-            ["concerning", "the vibes are questionable", "we need to talk"]
-        )
-    if score >= 25:
-        return random.choice(["chaotic", "this is a cry for help", "bestie no"])
-    return random.choice(["cooked", "it's giving dumpster fire", "expired"])
+    return score_to_verdict(score)
 
 
 def collect_python_files(path: Path) -> list[Path]:

@@ -6,64 +6,6 @@ import re
 
 from flake8_vibes.rules.base import VibError, VibRule
 
-_GOD_NAMES = frozenset({"data", "result", "info", "stuff", "thing", "obj"})
-
-_GOD_VARIABLE_MESSAGES = [
-    "`{name}` holds everything and describes nothing.",
-    "you named it `{name}`. that name fits anything.",
-    "`{name}` is a variable that refused to be specific.",
-    "every codebase has a `{name}`. yours doesn't need one.",
-]
-
-_SINGLE_LETTER_MESSAGES = [
-    "`{name}` outside a loop is a variable with a secret identity.",
-    "single-letter variables outside loops are readability crimes.",
-    "`{name}` is one character and zero context.",
-    "you used `{name}` like everyone knows what it is. outside a loop, they don't.",
-]
-
-_PLACEHOLDER_NAME_MESSAGES = [
-    "`{name}` was supposed to be temporary. it wasn't.",
-    "temp variables that outlive their branch are permanent problems.",
-    "`{name}` — the naming equivalent of 'I'll clean this up later'. you won't.",
-    "calling it `{name}` is a promise you made to yourself that you broke.",
-]
-
-_NEW_PREFIX_MESSAGES = [
-    "`{name}` implies there's an `old_` version nearby. there isn't.",
-    "`{name}` — the `new_` prefix means you had an `old_` and didn't clean up.",
-    "`{name}` — temporal naming is not naming.",
-    "`{name}` — if you need `new_` to tell it apart, you have two things and one idea.",
-]
-
-_COPY_SUFFIX_MESSAGES = [
-    "`{name}` — version numbers in variable names is what git branches are for.",
-    "you added `_copy` or a number to `{name}` instead of thinking of a better name.",
-    "`{name}` is a variable name that tells you its history, not its purpose.",
-    "suffixing numbers or `_copy` on `{name}` is a naming strategy that fails at scale.",
-]
-
-_OVERCONFIDENT_NAME_MESSAGES = [
-    "`{name}` — `final` is not a description, it's a wish. three PRs from now it'll be `final_v2`.",
-    "nothing in code is final. `{name}` will be renamed.",
-    "`{name}` — the hubris of `final` in a variable name.",
-    "every `final_` variable has a sibling named `final_final_`.",
-]
-
-_OPAQUE_BOOL_MESSAGES = [
-    "`{name}` is a boolean that refused to describe itself.",
-    "a variable called `{name}` tells you it's a boolean and nothing else.",
-    "`{name}` is the least informative boolean name available.",
-    "`flag` is not a question. `{name}` is not an answer.",
-]
-
-_VAGUE_CLASS_MESSAGES = [
-    "`{name}` manages something. the question is what.",
-    "Manager classes are where responsibility goes to hide. `{name}` is no exception.",
-    "`{name}` — every codebase has one, none of them know what it does.",
-    "`{name}` — a class with Manager in the name is a class with identity issues.",
-]
-
 
 def _store_names(tree: ast.AST) -> list[ast.Name]:
     return [
@@ -84,10 +26,10 @@ def _loop_and_comp_positions(tree: ast.AST) -> set[tuple[int, int]]:
         ):
             for gen in node.generators:
                 targets.append(gen.target)
-        for t in targets:
-            for n in ast.walk(t):
-                if isinstance(n, ast.Name):
-                    positions.add((n.lineno, n.col_offset))
+        for target in targets:
+            for name in ast.walk(target):
+                if isinstance(name, ast.Name):
+                    positions.add((name.lineno, name.col_offset))
     return positions
 
 
@@ -100,6 +42,18 @@ def _name_words(name: str) -> list[str]:
         subparts = re.findall(r"[A-Z]?[a-z]+|[A-Z]+(?=[A-Z][a-z]|\d|$)|[A-Z]|\d+", part)
         words.extend(w.lower() for w in subparts if w)
     return words
+
+
+# ── VIB013 — god-variable ────────────────────────────────────────────────────
+
+_GOD_NAMES = frozenset({"data", "result", "info", "stuff", "thing", "obj"})
+
+_GOD_VARIABLE_MESSAGES = [
+    "`{name}` holds everything and describes nothing.",
+    "you named it `{name}`. that name fits anything.",
+    "`{name}` is a variable that refused to be specific.",
+    "every codebase has a `{name}`. yours doesn't need one.",
+]
 
 
 class GodVariableRule(VibRule):
@@ -115,15 +69,19 @@ class GodVariableRule(VibRule):
         for node in _store_names(tree):
             if node.id in _GOD_NAMES:
                 msg = random.choice(_GOD_VARIABLE_MESSAGES).format(name=node.id)
-                errors.append(
-                    (
-                        node.lineno,
-                        node.col_offset,
-                        f"VIB013 naming crime: {msg}",
-                        type(self),
-                    )
-                )
+                prefix = f"VIB013 naming crime: {msg}"
+                errors.append((node.lineno, node.col_offset, prefix, type(self)))
         return errors
+
+
+# ── VIB014 — single-letter ───────────────────────────────────────────────────
+
+_SINGLE_LETTER_MESSAGES = [
+    "`{name}` outside a loop is a variable with a secret identity.",
+    "single-letter variables outside loops are readability crimes.",
+    "`{name}` is one character and zero context.",
+    "you used `{name}` like everyone knows what it is. outside a loop, they don't.",
+]
 
 
 class SingleLetterRule(VibRule):
@@ -141,15 +99,19 @@ class SingleLetterRule(VibRule):
             if len(node.id) == 1 and node.id != "_":
                 if (node.lineno, node.col_offset) not in excluded:
                     msg = random.choice(_SINGLE_LETTER_MESSAGES).format(name=node.id)
-                    errors.append(
-                        (
-                            node.lineno,
-                            node.col_offset,
-                            f"VIB014 naming crime: {msg}",
-                            type(self),
-                        )
-                    )
+                    prefix = f"VIB014 naming crime: {msg}"
+                    errors.append((node.lineno, node.col_offset, prefix, type(self)))
         return errors
+
+
+# ── VIB015 — temp-variable ───────────────────────────────────────────────────
+
+_PLACEHOLDER_NAME_MESSAGES = [
+    "`{name}` was supposed to be temporary. it wasn't.",
+    "temp variables that outlive their branch are permanent problems.",
+    "`{name}` — the naming equivalent of 'I'll clean this up later'. you won't.",
+    "calling it `{name}` is a promise you made to yourself that you broke.",
+]
 
 
 class TempVariableRule(VibRule):
@@ -166,15 +128,19 @@ class TempVariableRule(VibRule):
             parts = node.id.lower().split("_")
             if any(re.fullmatch(r"temp\d*|tmp\d*", p) for p in parts):
                 msg = random.choice(_PLACEHOLDER_NAME_MESSAGES).format(name=node.id)
-                errors.append(
-                    (
-                        node.lineno,
-                        node.col_offset,
-                        f"VIB015 naming crime: {msg}",
-                        type(self),
-                    )
-                )
+                prefix = f"VIB015 naming crime: {msg}"
+                errors.append((node.lineno, node.col_offset, prefix, type(self)))
         return errors
+
+
+# ── VIB016 — new-prefix ──────────────────────────────────────────────────────
+
+_NEW_PREFIX_MESSAGES = [
+    "`{name}` implies there's an `old_` version nearby. there isn't.",
+    "`{name}` — the `new_` prefix means you had an `old_` and didn't clean up.",
+    "`{name}` — temporal naming is not naming.",
+    "`{name}` — if you need `new_` to tell it apart, you have two things and one idea.",
+]
 
 
 class NewPrefixRule(VibRule):
@@ -190,15 +156,19 @@ class NewPrefixRule(VibRule):
         for node in _store_names(tree):
             if node.id == "new" or node.id.startswith("new_"):
                 msg = random.choice(_NEW_PREFIX_MESSAGES).format(name=node.id)
-                errors.append(
-                    (
-                        node.lineno,
-                        node.col_offset,
-                        f"VIB016 naming crime: {msg}",
-                        type(self),
-                    )
-                )
+                prefix = f"VIB016 naming crime: {msg}"
+                errors.append((node.lineno, node.col_offset, prefix, type(self)))
         return errors
+
+
+# ── VIB017 — copy-suffix ─────────────────────────────────────────────────────
+
+_COPY_SUFFIX_MESSAGES = [
+    "`{name}` — version numbers in variable names is what git branches are for.",
+    "you added `_copy` or a number to `{name}` instead of thinking of a better name.",
+    "`{name}` is a variable name that tells you its history, not its purpose.",
+    "suffixing numbers or `_copy` on `{name}` is a naming strategy that fails at scale.",
+]
 
 
 class CopySuffixRule(VibRule):
@@ -214,15 +184,19 @@ class CopySuffixRule(VibRule):
         for node in _store_names(tree):
             if re.search(r"_\d+$|_copy$", node.id):
                 msg = random.choice(_COPY_SUFFIX_MESSAGES).format(name=node.id)
-                errors.append(
-                    (
-                        node.lineno,
-                        node.col_offset,
-                        f"VIB017 naming crime: {msg}",
-                        type(self),
-                    )
-                )
+                prefix = f"VIB017 naming crime: {msg}"
+                errors.append((node.lineno, node.col_offset, prefix, type(self)))
         return errors
+
+
+# ── VIB018 — final-variable ──────────────────────────────────────────────────
+
+_OVERCONFIDENT_NAME_MESSAGES = [
+    "`{name}` — `final` is not a description, it's a wish. three PRs from now it'll be `final_v2`.",
+    "nothing in code is final. `{name}` will be renamed.",
+    "`{name}` — the hubris of `final` in a variable name.",
+    "every `final_` variable has a sibling named `final_final_`.",
+]
 
 
 class FinalVariableRule(VibRule):
@@ -238,15 +212,19 @@ class FinalVariableRule(VibRule):
         for node in _store_names(tree):
             if "final" in node.id.lower().split("_"):
                 msg = random.choice(_OVERCONFIDENT_NAME_MESSAGES).format(name=node.id)
-                errors.append(
-                    (
-                        node.lineno,
-                        node.col_offset,
-                        f"VIB018 naming crime: {msg}",
-                        type(self),
-                    )
-                )
+                prefix = f"VIB018 naming crime: {msg}"
+                errors.append((node.lineno, node.col_offset, prefix, type(self)))
         return errors
+
+
+# ── VIB019 — flag-variable ───────────────────────────────────────────────────
+
+_OPAQUE_BOOL_MESSAGES = [
+    "`{name}` is a boolean that refused to describe itself.",
+    "a variable called `{name}` tells you it's a boolean and nothing else.",
+    "`{name}` is the least informative boolean name available.",
+    "`flag` is not a question. `{name}` is not an answer.",
+]
 
 
 class FlagVariableRule(VibRule):
@@ -262,15 +240,19 @@ class FlagVariableRule(VibRule):
         for node in _store_names(tree):
             if "flag" in node.id.lower().split("_"):
                 msg = random.choice(_OPAQUE_BOOL_MESSAGES).format(name=node.id)
-                errors.append(
-                    (
-                        node.lineno,
-                        node.col_offset,
-                        f"VIB019 naming crime: {msg}",
-                        type(self),
-                    )
-                )
+                prefix = f"VIB019 naming crime: {msg}"
+                errors.append((node.lineno, node.col_offset, prefix, type(self)))
         return errors
+
+
+# ── VIB020 — vague-class ─────────────────────────────────────────────────────
+
+_VAGUE_CLASS_MESSAGES = [
+    "`{name}` manages something. the question is what.",
+    "Manager classes are where responsibility goes to hide. `{name}` is no exception.",
+    "`{name}` — every codebase has one, none of them know what it does.",
+    "`{name}` — a class with Manager in the name is a class with identity issues.",
+]
 
 
 class VagueClassRule(VibRule):
@@ -287,12 +269,6 @@ class VagueClassRule(VibRule):
             if isinstance(node, ast.ClassDef):
                 if "manager" in _name_words(node.name):
                     msg = random.choice(_VAGUE_CLASS_MESSAGES).format(name=node.name)
-                    errors.append(
-                        (
-                            node.lineno,
-                            node.col_offset,
-                            f"VIB020 naming crime: {msg}",
-                            type(self),
-                        )
-                    )
+                    prefix = f"VIB020 naming crime: {msg}"
+                    errors.append((node.lineno, node.col_offset, prefix, type(self)))
         return errors
