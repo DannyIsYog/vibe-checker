@@ -4,6 +4,7 @@ import ast
 import textwrap
 
 from flake8_vibes.rules.misc_chaos import (
+    _ALL_PRIVATE_MESSAGES,
     _ASSERT_NON_TEST_MESSAGES,
     _DICT_CONSTRUCTOR_MESSAGES,
     _EVAL_MESSAGES,
@@ -14,6 +15,8 @@ from flake8_vibes.rules.misc_chaos import (
     _LIST_AROUND_LITERAL_MESSAGES,
     _NESTED_COMPREHENSION_MESSAGES,
     _SYS_EXIT_MESSAGES,
+    _ZERO_STAR_MESSAGES,
+    AllExportsPrivateRule,
     AssertInNonTestRule,
     DictConstructorRule,
     EvalUsedRule,
@@ -24,6 +27,7 @@ from flake8_vibes.rules.misc_chaos import (
     ListAroundLiteralRule,
     NestedComprehensionRule,
     SysExitRule,
+    ZeroStarRepoRule,
 )
 
 
@@ -254,3 +258,63 @@ def test_099_no_flag_sys_other_method():
 
 def test_099_messages_list():
     assert len(_SYS_EXIT_MESSAGES) >= 2
+
+
+# ── VIB093: __all__ exports private names ────────────────────────────────────
+
+
+def test_093_flags_private_in_all():
+    src = "__all__ = ['PublicThing', '_PrivateThing']"
+    errors = AllExportsPrivateRule().check(parse(src))
+    assert len(errors) == 1
+    assert "VIB093" in errors[0][2]
+    assert "_PrivateThing" in errors[0][2]
+
+
+def test_093_no_flag_all_public():
+    src = "__all__ = ['PublicA', 'PublicB']"
+    assert AllExportsPrivateRule().check(parse(src)) == []
+
+
+def test_093_flags_dunder_in_all():
+    src = "__all__ = ['__secret__']"
+    errors = AllExportsPrivateRule().check(parse(src))
+    assert len(errors) == 1
+
+
+def test_093_no_flag_no_all():
+    src = "x = 1"
+    assert AllExportsPrivateRule().check(parse(src)) == []
+
+
+def test_093_messages_list():
+    assert len(_ALL_PRIVATE_MESSAGES) >= 2
+
+
+# ── VIB100: zero-star repo energy ─────────────────────────────────────────────
+
+
+def test_100_flags_all_prints_no_structure():
+    src = "\n".join(f"print({i})" for i in range(6))
+    errors = ZeroStarRepoRule().check(parse(src))
+    assert len(errors) == 1
+    assert "VIB100" in errors[0][2]
+
+
+def test_100_no_flag_has_function():
+    src = "def foo():\n    pass\n" + "\n".join(f"print({i})" for i in range(6))
+    assert ZeroStarRepoRule().check(parse(src)) == []
+
+
+def test_100_no_flag_has_class():
+    src = "class Foo:\n    pass\n" + "\n".join(f"print({i})" for i in range(6))
+    assert ZeroStarRepoRule().check(parse(src)) == []
+
+
+def test_100_no_flag_too_few_prints():
+    src = "print(1)\nprint(2)\nprint(3)"
+    assert ZeroStarRepoRule().check(parse(src)) == []
+
+
+def test_100_messages_list():
+    assert len(_ZERO_STAR_MESSAGES) >= 2

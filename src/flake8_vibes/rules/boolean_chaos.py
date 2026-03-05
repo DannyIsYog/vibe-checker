@@ -63,8 +63,8 @@ class EqualsTrueRule(VibRule):
 _EQUALS_FALSE_MESSAGES = [
     "`if not x` was RIGHT THERE and you looked it dead in the face and typed `== False` anyway.",
     "`== False` is just `not` with extra steps, less confidence, and worse vibes.",
-    "Python has a `not` keyword. it's been here since 1991. i'm begging you to use it.",
-    "`== False` — asking Python to confirm what it already knows. exhausting for everyone.",
+    "`== False` — you wrote a comparison where negation was the obvious move and you looked right past it.",
+    "`== False` on a boolean. an unnecessary question to a thing that already knew the answer.",
     "`if not x` exists. it has always existed. it will outlive us all.",
     "this is literally just `not x` in a trench coat and the coat isn't even good.",
 ]
@@ -88,8 +88,8 @@ class EqualsFalseRule(VibRule):
 
 _EQUALS_NONE_MESSAGES = [
     "`is None` exists specifically for you and you chose `== None` anyway. rude.",
-    "`== None` works until a `__eq__` override makes it your problem. and it will.",
-    "None is a singleton. you identity-check singletons. this is not a debate.",
+    "`== None` is technically allowed and spiritually the wrong call. every time.",
+    "`== None` has the energy of someone who read the rule, understood it, and disagreed.",
     "`== None` is technically allowed and spiritually a cry for help.",
     "`is None` has been here the whole time. waiting. patient. judging.",
     "PEP 8 asked nicely. flake8 asked sternly. we are not asking.",

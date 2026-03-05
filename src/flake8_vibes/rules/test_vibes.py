@@ -9,9 +9,9 @@ from flake8_vibes.rules.base import VibError, VibRule
 
 _NO_ASSERTION_MESSAGES = [
     "test `{name}` has no assertions. it passes by default. that's not a test, that's a prayer.",
-    "`{name}` runs but never asserts anything. a test that can't fail can't prove anything.",
+    "`{name}` runs to completion with nothing checked. a confidence builder with no load-bearing truth.",
     "found `{name}` with zero assertions. it's green. it means nothing.",
-    "`{name}` has no `assert`. it exercises code and trusts it went fine. it didn't.",
+    "`{name}` has no assertions. whatever happened in there, you've decided to trust it. bold.",
 ]
 
 
@@ -120,8 +120,8 @@ class AssertTrueRule(VibRule):
 # ── VIB072 — test with time.sleep() ─────────────────────────────────────────
 
 _TIME_SLEEP_MESSAGES = [
-    "`time.sleep()` in a test is a guess wearing a timer. mock the time, not the clock.",
-    "test uses `time.sleep()`. whatever you're waiting for, you should be mocking it.",
+    "`time.sleep()` in a test: a race condition waiting for the right CI machine to lose.",
+    "`time.sleep()` in a test: you're betting the test suite on timing. timing will betray you.",
     "found `time.sleep()` in a test. flaky tests have a sleep in them. this is a flaky test.",
     "`time.sleep()` in tests is a prayer that timing will cooperate. it won't, eventually.",
 ]
@@ -151,3 +151,45 @@ class TimeSleepInTestRule(VibRule):
                 prefix = f"VIB072 test: {msg}"
                 errors.append((node.lineno, node.col_offset, prefix, type(self)))
         return errors
+
+
+# ── VIB073 — copy-pasted test body ───────────────────────────────────────────
+
+_COPY_PASTED_TEST_MESSAGES = [
+    "test `{name}` has the same body as another test. that's not a second test, it's a copy.",
+    "`{name}` is an exact copy of another test. two identical tests prove the same thing once.",
+    "found duplicate test body in `{name}`. copy-pasting tests is one test with an identity crisis.",
+    "`{name}` and another test are identical. delete one or actually test something different.",
+]
+
+
+def _duplicate_test_errors(body_dumps: dict[str, list[ast.FunctionDef]], rule_type: type) -> list[VibError]:
+    errors: list[VibError] = []
+    for funcs in body_dumps.values():
+        if len(funcs) >= 2:
+            for func in funcs[1:]:
+                msg = random.choice(_COPY_PASTED_TEST_MESSAGES).format(name=func.name)
+                errors.append((func.lineno, func.col_offset, f"VIB073 test: {msg}", rule_type))
+    return errors
+
+
+class CopyPastedTestRule(VibRule):
+    code = "VIB073"
+
+    def check(
+        self,
+        tree: ast.AST,
+        filename: str = "<unknown>",
+        lines: list[str] | None = None,
+    ) -> list[VibError]:
+        if "test" not in filename.lower():
+            return []
+        test_funcs = [
+            node for node in ast.walk(tree)
+            if isinstance(node, ast.FunctionDef) and node.name.startswith("test_")
+        ]
+        body_dumps: dict[str, list[ast.FunctionDef]] = {}
+        for func in test_funcs:
+            key = ast.dump(ast.Module(body=func.body, type_ignores=[]))
+            body_dumps.setdefault(key, []).append(func)
+        return _duplicate_test_errors(body_dumps, type(self))

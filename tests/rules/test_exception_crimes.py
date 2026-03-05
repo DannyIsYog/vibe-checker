@@ -6,8 +6,10 @@ import textwrap
 from flake8_vibes.rules.exception_crimes import (
     _EXCEPT_EXCEPTION_MESSAGES,
     _RAISE_EXCEPTION_MESSAGES,
+    _RERAISE_NO_LOG_MESSAGES,
     ExceptExceptionRule,
     RaiseExceptionRule,
+    ReraiseNoLogRule,
 )
 
 
@@ -112,3 +114,83 @@ def test_006_error_tuple_format():
 
 def test_006_messages_list():
     assert len(_RAISE_EXCEPTION_MESSAGES) >= 2
+
+
+# ── VIB007: re-raise without logging ─────────────────────────────────────────
+
+def parse7(source: str) -> ast.AST:
+    return ast.parse(textwrap.dedent(source))
+
+
+def check_reraise(source: str) -> list:
+    tree = parse7(source)
+    lines = textwrap.dedent(source).splitlines(keepends=True)
+    return ReraiseNoLogRule().check(tree, lines=lines)
+
+
+def test_007_flags_bare_reraise():
+    src = """
+        try:
+            pass
+        except ValueError:
+            raise
+    """
+    errors = check_reraise(src)
+    assert len(errors) == 1
+    assert "VIB007" in errors[0][2]
+
+
+def test_007_no_flag_with_logging():
+    src = """
+        try:
+            pass
+        except ValueError:
+            logger.error("oops")
+            raise
+    """
+    assert check_reraise(src) == []
+
+
+def test_007_no_flag_reraise_with_exc():
+    src = """
+        try:
+            pass
+        except ValueError:
+            raise RuntimeError("wrapped")
+    """
+    assert check_reraise(src) == []
+
+
+def test_007_no_flag_no_reraise():
+    src = """
+        try:
+            pass
+        except ValueError:
+            pass
+    """
+    assert check_reraise(src) == []
+
+
+def test_007_no_flag_with_warning_log():
+    src = """
+        try:
+            pass
+        except ValueError:
+            log.warning("bad")
+            raise
+    """
+    assert check_reraise(src) == []
+
+
+def test_007_error_tuple_format():
+    src = "try:\n    pass\nexcept ValueError:\n    raise"
+    errors = check_reraise(src)
+    row, col, msg, typ = errors[0]
+    assert isinstance(row, int)
+    assert isinstance(col, int)
+    assert isinstance(msg, str)
+    assert isinstance(typ, type)
+
+
+def test_007_messages_list():
+    assert len(_RERAISE_NO_LOG_MESSAGES) >= 2

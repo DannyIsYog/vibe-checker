@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ast
 import random
+import re
 
 from flake8_vibes.rules.base import VibError, VibRule
 
@@ -136,4 +137,39 @@ class ImportPdbRule(VibRule):
                 msg = random.choice(_IMPORT_PDB_MESSAGES)
                 prefix = f"VIB011 debug: {msg}"
                 errors.append((node.lineno, node.col_offset, prefix, type(self)))
+        return errors
+
+
+# ── VIB012 — console.log in .py file ─────────────────────────────────────────
+
+_CONSOLE_LOG_MESSAGES = [
+    "`console.log` is JavaScript's cry for help. this is Python. we have `print()`.",
+    "found `console.log` in a `.py` file. the wrong language called, you answered.",
+    "`console.log` in Python: someone switched languages and forgot to switch files.",
+    "this is Python. `console.log` does not exist here. it never did. it never will.",
+]
+
+_CONSOLE_LOG_RE = re.compile(r"console\.log\s*\(", re.IGNORECASE)
+
+
+class ConsoleLogInPyRule(VibRule):
+    code = "VIB012"
+
+    def check(
+        self,
+        tree: ast.AST,
+        filename: str = "<unknown>",
+        lines: list[str] | None = None,
+    ) -> list[VibError]:
+        if lines is None:
+            return []
+        errors: list[VibError] = []
+        for i, line in enumerate(lines):
+            match = _CONSOLE_LOG_RE.search(line)
+            if not match:
+                continue
+            before = line[: match.start()]
+            if "#" in before or line.lstrip().startswith("#"):
+                continue
+            errors.append((i + 1, 0, f"VIB012 debug: {random.choice(_CONSOLE_LOG_MESSAGES)}", type(self)))
         return errors

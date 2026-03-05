@@ -50,8 +50,8 @@ class AsyncNoAwaitRule(VibRule):
 
 _ASYNCIO_SLEEP_0_MESSAGES = [
     "`asyncio.sleep(0)` is a yield to the event loop disguised as a nap.",
-    "found `asyncio.sleep(0)`. if you need to yield control, say what you mean.",
-    "`asyncio.sleep(0)` — a magic number in your async code. document the intent.",
+    "`asyncio.sleep(0)` — a zero-duration nap with a lot of unstated intent.",
+    "`asyncio.sleep(0)`: the number zero, doing the work of an entire explanation.",
     "`asyncio.sleep(0)` is a handshake with the event loop that nobody documented.",
 ]
 

@@ -8,10 +8,12 @@ from flake8_vibes.rules.return_crimes import (
     _EXPLICIT_RETURN_NONE_MESSAGES,
     _MUTABLE_DEFAULT_MESSAGES,
     _SHADOW_BUILTIN_MESSAGES,
+    _UNDERSCORE_USED_MESSAGES,
     AssignThenReturnRule,
     ExplicitReturnNoneRule,
     MutableDefaultArgRule,
     ShadowBuiltinRule,
+    UnderscoreUsedRule,
 )
 
 
@@ -227,3 +229,35 @@ def test_056_error_tuple_format():
 
 def test_056_messages_list():
     assert len(_SHADOW_BUILTIN_MESSAGES) >= 2
+
+
+# ── VIB057: assigning to _ then using it ─────────────────────────────────────
+
+def check_underscore(source: str) -> list:
+    return UnderscoreUsedRule().check(ast.parse(textwrap.dedent(source)))
+
+
+def test_057_flags_assign_then_use():
+    src = "_ = compute()\nprint(_)"
+    errors = check_underscore(src)
+    assert len(errors) == 1
+    assert "VIB057" in errors[0][2]
+
+
+def test_057_no_flag_tuple_discard():
+    src = "_, x = (1, 2)\nprint(x)"
+    assert check_underscore(src) == []
+
+
+def test_057_no_flag_used_as_translation():
+    src = '_("hello")'
+    assert check_underscore(src) == []
+
+
+def test_057_no_flag_no_assignment():
+    src = "x = compute()\nprint(x)"
+    assert check_underscore(src) == []
+
+
+def test_057_messages_list():
+    assert len(_UNDERSCORE_USED_MESSAGES) >= 2

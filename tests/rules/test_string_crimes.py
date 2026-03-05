@@ -5,9 +5,11 @@ import textwrap
 
 from flake8_vibes.rules.string_crimes import (
     _FORMAT_POSITIONAL_MESSAGES,
+    _MULTILINE_COMMENT_MESSAGES,
     _PERCENT_FORMAT_MESSAGES,
     _STRING_CONCAT_LOOP_MESSAGES,
     FormatPositionalRule,
+    MultilineStringCommentRule,
     PercentFormatRule,
     StringConcatInLoopRule,
 )
@@ -142,3 +144,53 @@ def test_079_error_tuple_format():
 
 def test_079_messages_list():
     assert len(_FORMAT_POSITIONAL_MESSAGES) >= 2
+
+
+# ── VIB080: multiline string as comment ──────────────────────────────────────
+
+def check_multiline(source: str) -> list:
+    return MultilineStringCommentRule().check(ast.parse(textwrap.dedent(source)))
+
+
+def test_080_flags_standalone_multiline():
+    src = textwrap.dedent("""\
+        x = 1
+        \"\"\"
+        This is a note
+        about something.
+        \"\"\"
+        y = 2
+    """)
+    errors = check_multiline(src)
+    assert len(errors) == 1
+    assert "VIB080" in errors[0][2]
+
+
+def test_080_no_flag_function_docstring():
+    src = textwrap.dedent("""\
+        def foo():
+            \"\"\"
+            This is a docstring.
+            \"\"\"
+            pass
+    """)
+    assert check_multiline(src) == []
+
+
+def test_080_no_flag_single_line_string():
+    src = 'x = "not multiline"\n'
+    assert check_multiline(src) == []
+
+
+def test_080_no_flag_module_docstring():
+    src = textwrap.dedent("""\
+        \"\"\"
+        Module docstring.
+        \"\"\"
+        x = 1
+    """)
+    assert check_multiline(src) == []
+
+
+def test_080_messages_list():
+    assert len(_MULTILINE_COMMENT_MESSAGES) >= 2

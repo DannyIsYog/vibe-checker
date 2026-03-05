@@ -4,11 +4,13 @@ import ast
 import textwrap
 
 from flake8_vibes.rules.test_vibes import (
+    _ASSERT_TRUE_MESSAGES,
+    _COPY_PASTED_TEST_MESSAGES,
     _NO_ASSERTION_MESSAGES,
     _TEST_IT_MESSAGES,
-    _ASSERT_TRUE_MESSAGES,
     _TIME_SLEEP_MESSAGES,
     AssertTrueRule,
+    CopyPastedTestRule,
     TestNamedTestItRule,
     TestNoAssertionRule,
     TimeSleepInTestRule,
@@ -176,3 +178,55 @@ def test_072_no_flag_asyncio_sleep():
 
 def test_072_messages_list():
     assert len(_TIME_SLEEP_MESSAGES) >= 2
+
+
+# ── VIB073: copy-pasted test body ────────────────────────────────────────────
+
+def check_copy_paste(source: str) -> list:
+    tree = ast.parse(textwrap.dedent(source))
+    return CopyPastedTestRule().check(tree, filename="test_stuff.py")
+
+
+def test_073_flags_identical_tests():
+    src = textwrap.dedent("""\
+        def test_one():
+            assert 1 == 1
+
+        def test_two():
+            assert 1 == 1
+    """)
+    errors = check_copy_paste(src)
+    assert len(errors) == 1
+    assert "VIB073" in errors[0][2]
+
+
+def test_073_no_flag_different_bodies():
+    src = textwrap.dedent("""\
+        def test_one():
+            assert 1 == 1
+
+        def test_two():
+            assert 2 == 2
+    """)
+    assert check_copy_paste(src) == []
+
+
+def test_073_no_flag_single_test():
+    src = "def test_one():\n    assert 1 == 1\n"
+    assert check_copy_paste(src) == []
+
+
+def test_073_no_flag_non_test_file():
+    src = textwrap.dedent("""\
+        def test_one():
+            assert 1 == 1
+
+        def test_two():
+            assert 1 == 1
+    """)
+    tree = ast.parse(src)
+    assert CopyPastedTestRule().check(tree, filename="helpers.py") == []
+
+
+def test_073_messages_list():
+    assert len(_COPY_PASTED_TEST_MESSAGES) >= 2

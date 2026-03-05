@@ -5,10 +5,12 @@ import textwrap
 
 from flake8_vibes.rules.debug_artifacts import (
     _BREAKPOINT_MESSAGES,
+    _CONSOLE_LOG_MESSAGES,
     _IMPORT_PDB_MESSAGES,
     _PDB_SET_TRACE_MESSAGES,
     _PRINT_MESSAGES,
     BreakpointLeftBehindRule,
+    ConsoleLogInPyRule,
     ImportPdbRule,
     PdbSetTraceRule,
     PrintLeftBehindRule,
@@ -160,3 +162,47 @@ def test_011_error_tuple_format():
 
 def test_011_messages_list():
     assert len(_IMPORT_PDB_MESSAGES) >= 2
+
+
+# ── VIB012: console.log in .py ───────────────────────────────────────────────
+
+def check_console_log(source: str) -> list:
+    tree = ast.parse(textwrap.dedent(source))
+    lines = textwrap.dedent(source).splitlines(keepends=True)
+    return ConsoleLogInPyRule().check(tree, lines=lines)
+
+
+def test_012_flags_console_log():
+    errors = check_console_log("console.log(x)")
+    assert len(errors) == 1
+    assert "VIB012" in errors[0][2]
+
+
+def test_012_flags_with_space():
+    errors = check_console_log("  console.log( 'hi' )")
+    assert len(errors) == 1
+
+
+def test_012_no_flag_print():
+    assert check_console_log("print('hi')") == []
+
+
+def test_012_no_flag_in_comment():
+    assert check_console_log("# console.log(x)") == []
+
+
+def test_012_flags_case_insensitive():
+    errors = check_console_log("Console.Log(x)")
+    assert len(errors) == 1
+
+
+def test_012_error_tuple_format():
+    row, col, msg, typ = check_console_log("console.log(x)")[0]
+    assert isinstance(row, int)
+    assert isinstance(col, int)
+    assert isinstance(msg, str)
+    assert isinstance(typ, type)
+
+
+def test_012_messages_list():
+    assert len(_CONSOLE_LOG_MESSAGES) >= 2

@@ -7,13 +7,14 @@ import random
 from flake8_vibes.rules.base import VibError, VibRule
 
 _CODE_INDICATORS = ("=", "(", ")", "self.", "return ", "def ", "class ", "import ", "for ", "if ", "while ")
+_GRAVEYARD_MIN_RUN = 3
 
 # ── VIB021 — commented-out code graveyard ───────────────────────────────────
 
 _COMMENTED_CODE_MESSAGES = [
-    "3+ consecutive commented-out lines found. git exists. use it. delete the corpse.",
+    "3+ lines of commented-out code found. they're not dead enough to delete and not alive enough to run. haunted.",
     "a graveyard of commented code detected. delete it or commit to it, stop hovering.",
-    "commented-out code is not a backup strategy. that's what branches are for.",
+    "this commented-out code has survived more deploys than it deserved. impressive. also: embarrassing.",
     "found a commented-out code block. git blame will find you. it always does.",
 ]
 
@@ -44,7 +45,7 @@ class CommentedCodeGraveyardRule(VibRule):
                 if run_length == 0:
                     run_start = i
                 run_length += 1
-                if run_length == 3:
+                if run_length == _GRAVEYARD_MIN_RUN:
                     msg = random.choice(_COMMENTED_CODE_MESSAGES)
                     errors.append((run_start + 1, 0, f"VIB021 comment: {msg}", type(self)))
             else:
@@ -58,7 +59,7 @@ _TYPE_IGNORE_MESSAGES = [
     "silent type-ignore with no explanation is a lie you're asking mypy to sign off on.",
     "type-ignore alone — you know something is wrong and you chose not to say what.",
     "type-ignore without a reason is an unanswered question you committed to the repo.",
-    "add an explanation after type-ignore or admit you don't know why you're ignoring it.",
+    "a type-ignore with nothing after it is a sealed verdict and a destroyed evidence bag.",
 ]
 
 
@@ -93,10 +94,10 @@ class TypeIgnoreNoExplanationRule(VibRule):
 # ── VIB023 — noqa without code ──────────────────────────────────────────────
 
 _NOQA_NO_CODE_MESSAGES = [
-    "bare noqa suppresses everything. specify what you're ignoring or fix it.",
+    "bare noqa: a silencer for the entire lint rulebook. cowardly. efficient. wrong.",
     "noqa with no code is 'i know it's wrong and i refuse to say which wrong'.",
     "noqa alone is a blanket over a pile of lint that you refused to identify.",
-    "add a code after noqa with a colon. you're welcome.",
+    "a noqa with no code is the smell of someone who gave up and called it a fix.",
 ]
 
 
@@ -128,8 +129,8 @@ class NoqaNoCodeRule(VibRule):
 _TODO_NAMED_MESSAGES = [
     "found a named TODO. {name} hasn't fixed it. the ticket hasn't fixed it. the comment remains.",
     "TODO assigned to {name}. has {name} seen this? has {name} done anything about it? no.",
-    "a named TODO is the most passive-aggressive way to assign work without a ticket.",
-    "TODO with a name in it — the person, the comment, and the unfinished work, immortalized.",
+    "a named TODO is passive-aggressive task assignment. {name}'s name is here. the work is not.",
+    "TODO with {name}'s name in it — the person, the comment, and the unfinished work, immortalized.",
 ]
 
 
@@ -283,5 +284,109 @@ class LolWtfCommentRule(VibRule):
             if _LOL_WTF_RE.search(line):
                 msg = random.choice(_LOL_WTF_MESSAGES)
                 prefix = f"VIB029 comment: {msg}"
+                errors.append((i + 1, 0, prefix, type(self)))
+        return errors
+
+
+# ── VIB025 — obvious comment ─────────────────────────────────────────────────
+
+_OBVIOUS_COMMENT_MESSAGES = [
+    "the comment and the code are saying the same thing. one of them is a waste and it's not the code.",
+    "restating the code in English above the code is not documentation, it's subtitles for the obvious.",
+    "comment says what the code already says. this is documentation for people who don't trust themselves.",
+    "a comment that mirrors the next line is a comment that adds nothing and says everything wrong.",
+]
+
+_OBVIOUS_VERBS = frozenset({
+    "increment", "decrement", "initialize", "init", "reset", "set", "get",
+    "return", "add", "append", "check", "update", "clear", "process",
+    "calculate", "compute", "fetch", "load", "save", "store", "create",
+    "delete", "remove", "count", "sort", "filter", "convert", "format",
+    "assign", "define", "call", "run", "execute", "start", "stop",
+    "open", "close", "read", "write", "send", "receive", "log", "print",
+    "loop", "iterate", "build", "parse", "validate", "handle", "raise",
+    "yield", "collect", "merge", "split", "join", "insert", "pop",
+})
+
+_WORD_RE = re.compile(r"\b([a-zA-Z_][a-zA-Z0-9_]*)\b")
+_COMMENT_CONTENT_RE = re.compile(r"^\s*#\s*(.*?)\s*$")
+_OBVIOUS_MAX_WORDS = 5
+_OBVIOUS_LOOKAHEAD = 4
+
+
+def _is_obvious_comment(comment_text: str, next_code_line: str) -> bool:
+    words = comment_text.strip().split()
+    first_word_ok = bool(words) and words[0].lower() in _OBVIOUS_VERBS
+    short_enough = len(words) <= _OBVIOUS_MAX_WORDS
+    if not (first_word_ok and short_enough):
+        return False
+    rest = " ".join(words[1:])
+    comment_idents = {word.lower() for word in _WORD_RE.findall(rest) if len(word) > 1}
+    next_idents = {word.lower() for word in _WORD_RE.findall(next_code_line)}
+    return bool(comment_idents) and bool(comment_idents & next_idents)
+
+
+def _next_code_line(lines: list[str], after_idx: int) -> str:
+    for j in range(after_idx + 1, min(after_idx + _OBVIOUS_LOOKAHEAD, len(lines))):
+        stripped = lines[j].strip()
+        if stripped and not stripped.startswith("#"):
+            return lines[j]
+    return ""
+
+
+class ObviousCommentRule(VibRule):
+    code = "VIB025"
+
+    def check(
+        self,
+        tree: ast.AST,
+        filename: str = "<unknown>",
+        lines: list[str] | None = None,
+    ) -> list[VibError]:
+        if lines is None:
+            return []
+        errors: list[VibError] = []
+        for i, line in enumerate(lines):
+            comment_match = _COMMENT_CONTENT_RE.match(line)
+            if not comment_match:
+                continue
+            comment_text = comment_match.group(1)
+            if comment_text.startswith(("type:", "noqa", "fmt:", "pylint:", "mypy:")):
+                continue
+            next_code = _next_code_line(lines, i)
+            if next_code and _is_obvious_comment(comment_text, next_code):
+                errors.append((i + 1, 0, f"VIB025 comment: {random.choice(_OBVIOUS_COMMENT_MESSAGES)}", type(self)))
+        return errors
+
+
+# ── VIB035 — magic comment ──────────────────────────────────────  # noqa: VIB035
+# (VIB030 was already assigned to TooManyArgsRule)
+
+_MAGIC_COMMENT_MESSAGES = [
+    "a magic-tagged comment is not documentation. it is a confession.",
+    "magic is not a mechanism. explaining it as such is not documentation, it's an apology.",
+    "found a magic comment. if it needs that label, it needs a rewrite, not a comment.",
+    "magic comment in source code: something works and nobody knows why. that's called a bug.",
+]
+
+_MAGIC_COMMENT_RE = re.compile(r"#.*\bmagic\b", re.IGNORECASE)
+
+
+class MagicCommentRule(VibRule):
+    code = "VIB035"
+
+    def check(
+        self,
+        tree: ast.AST,
+        filename: str = "<unknown>",
+        lines: list[str] | None = None,
+    ) -> list[VibError]:
+        if lines is None:
+            return []
+        errors: list[VibError] = []
+        for i, line in enumerate(lines):
+            if _MAGIC_COMMENT_RE.search(line):
+                msg = random.choice(_MAGIC_COMMENT_MESSAGES)
+                prefix = f"VIB035 comment: {msg}"
                 errors.append((i + 1, 0, prefix, type(self)))
         return errors

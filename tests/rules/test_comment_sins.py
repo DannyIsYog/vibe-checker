@@ -8,7 +8,9 @@ from flake8_vibes.rules.comment_sins import (
     _DO_NOT_TOUCH_MESSAGES,
     _HACK_MESSAGES,
     _LOL_WTF_MESSAGES,
+    _MAGIC_COMMENT_MESSAGES,
     _NOQA_NO_CODE_MESSAGES,
+    _OBVIOUS_COMMENT_MESSAGES,
     _THIS_IS_FINE_MESSAGES,
     _TODO_NAMED_MESSAGES,
     _TYPE_IGNORE_MESSAGES,
@@ -16,7 +18,9 @@ from flake8_vibes.rules.comment_sins import (
     DoNotTouchRule,
     HackCommentRule,
     LolWtfCommentRule,
+    MagicCommentRule,
     NoqaNoCodeRule,
+    ObviousCommentRule,
     ThisIsFineRule,
     TodoNamedRule,
     TypeIgnoreNoExplanationRule,
@@ -289,3 +293,75 @@ def test_029_returns_empty_if_no_lines():
 
 def test_029_messages_list():
     assert len(_LOL_WTF_MESSAGES) >= 2
+
+
+# ── VIB025: obvious comment ───────────────────────────────────────────────────
+
+def check_obvious(source: str) -> list:
+    tree = ast.parse(textwrap.dedent(source))
+    lines = textwrap.dedent(source).splitlines(keepends=True)
+    return ObviousCommentRule().check(tree, lines=lines)
+
+
+def test_025_flags_obvious_increment():
+    src = "# increment counter\ncounter += 1\n"
+    errors = check_obvious(src)
+    assert len(errors) == 1
+    assert "VIB025" in errors[0][2]
+
+
+def test_025_flags_obvious_return():
+    src = "# return result\nresult = 1\n"
+    errors = check_obvious(src)
+    assert len(errors) == 1
+
+
+def test_025_no_flag_meaningful_comment():
+    src = "# this compensates for the DST offset applied in Europe only\nx = x + 3600\n"
+    assert check_obvious(src) == []
+
+
+def test_025_no_flag_type_comment():
+    src = "# type: ignore\nx = 1\n"
+    assert check_obvious(src) == []
+
+
+def test_025_no_flag_long_comment():
+    src = "# increment counter by the adjusted delta value from the previous frame calculation\ncounter += 1\n"
+    assert check_obvious(src) == []
+
+
+def test_025_messages_list():
+    assert len(_OBVIOUS_COMMENT_MESSAGES) >= 2
+
+
+# ── VIB035: magic comment ─────────────────────────────────────────────────────
+
+def check_magic(source: str) -> list:
+    tree = ast.parse(textwrap.dedent(source))
+    lines = textwrap.dedent(source).splitlines(keepends=True)
+    return MagicCommentRule().check(tree, lines=lines)
+
+
+def test_035_flags_magic_comment():
+    errors = check_magic("x = 1  # magic\n")
+    assert len(errors) == 1
+    assert "VIB035" in errors[0][2]
+
+
+def test_035_flags_magic_in_line():
+    errors = check_magic("# this is magic stuff\n")
+    assert len(errors) == 1
+
+
+def test_035_no_flag_no_magic():
+    assert check_magic("# increment counter\nx = 1\n") == []
+
+
+def test_035_no_flag_magic_in_string():
+    # magic in string literal, not a comment
+    assert check_magic('x = "this is magic"\n') == []
+
+
+def test_035_messages_list():
+    assert len(_MAGIC_COMMENT_MESSAGES) >= 2

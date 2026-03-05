@@ -26,10 +26,10 @@ _BUILTINS = {
 # ── VIB053 — explicit return None ───────────────────────────────────────────
 
 _EXPLICIT_RETURN_NONE_MESSAGES = [
-    "`return None` is redundant. the function already returns `None` by doing nothing.",
-    "explicit `return None` — you took the time to say nothing explicitly. python doesn't need this.",
+    "`return None` — you wrote an explicit statement to achieve what silence would have accomplished.",
+    "`return None` is loud about doing nothing. that's a personality flaw in a function.",
     "`return None` is the statement of a function that doesn't know how to end gracefully.",
-    "bare `return` was right there. `return None` is just more letters for the same silence.",
+    "`return None` — explicit, deliberate, and exactly what the implicit behavior was going to do anyway.",
 ]
 
 
@@ -59,10 +59,10 @@ class ExplicitReturnNoneRule(VibRule):
 # ── VIB054 — assign then immediately return ──────────────────────────────────
 
 _ASSIGN_RETURN_MESSAGES = [
-    "assign then immediately return — just return the expression. the variable adds nothing.",
+    "assigned to a variable, returned it immediately. that variable lived one line and contributed nothing.",
     "you assigned a variable to return it one line later. that variable had a zero-line lifespan.",
-    "intermediate variable assigned and immediately returned. cut the middleman.",
-    "assign then return: two lines to do what one line could. bold choice. wrong choice.",
+    "named it to immediately return it. the variable never had a chance to matter.",
+    "two statements where one would have done. the extra line is doing nothing and being paid for it.",
 ]
 
 
@@ -111,10 +111,10 @@ class AssignThenReturnRule(VibRule):
 # ── VIB055 — mutable default argument ───────────────────────────────────────
 
 _MUTABLE_DEFAULT_MESSAGES = [
-    "mutable default argument — this list is shared across every call. that is never what you wanted.",
+    "mutable default argument: the gift that keeps giving, unsolicited, across every call forever.",
     "a mutable default is a bug that hasn't introduced itself yet. it will.",
-    "default mutable argument: the same object, every call, forever. use `None` and check.",
-    "found a mutable default argument. it persists between calls. you will be confused later.",
+    "a mutable default that persists between calls — a state machine you didn't know you built.",
+    "a mutable default argument. it will outlive your understanding of why it's there.",
 ]
 
 
@@ -174,4 +174,47 @@ class ShadowBuiltinRule(VibRule):
                     errors.append(
                         (node.lineno, node.col_offset, prefix, type(self))
                     )
+        return errors
+
+
+# ── VIB057 — assigning to _ and then using it ────────────────────────────────
+
+_UNDERSCORE_USED_MESSAGES = [
+    "you assigned to `_` to signal you don't need it, then used it anyway. pick a side.",
+    "`_ = x` followed by use of `_`: the variable you said you didn't want is being used.",
+    "assigned to `_` and then loaded `_`. that's not discard, that's a variable with an identity crisis.",
+    "`_` means 'i don't need this'. using it afterward means you lied. use a real name.",
+]
+
+
+def _has_discard_assign(tree: ast.AST) -> bool:
+    return any(
+        isinstance(node, ast.Assign)
+        and len(node.targets) == 1
+        and isinstance(node.targets[0], ast.Name)
+        and node.targets[0].id == "_"
+        for node in ast.walk(tree)
+    )
+
+
+def _call_func_ids(tree: ast.AST) -> set[int]:
+    return {id(node.func) for node in ast.walk(tree) if isinstance(node, ast.Call)}
+
+
+class UnderscoreUsedRule(VibRule):
+    code = "VIB057"
+
+    def check(
+        self,
+        tree: ast.AST,
+        filename: str = "<unknown>",
+        lines: list[str] | None = None,
+    ) -> list[VibError]:
+        if not _has_discard_assign(tree):
+            return []
+        call_funcs = _call_func_ids(tree)
+        errors: list[VibError] = []
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Name) and node.id == "_" and isinstance(node.ctx, ast.Load) and id(node) not in call_funcs:
+                errors.append((node.lineno, node.col_offset, f"VIB057 return: {random.choice(_UNDERSCORE_USED_MESSAGES)}", type(self)))
         return errors

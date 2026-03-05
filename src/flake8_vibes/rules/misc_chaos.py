@@ -59,9 +59,9 @@ class LambdaAssignedRule(VibRule):
 # ── VIB090 — global statement ────────────────────────────────────────────────
 
 _GLOBAL_MESSAGES = [
-    "`global` is a way of saying 'i couldn't figure out how to pass this as an argument'.",
+    "`global` — the last resort of someone who ran out of better ideas and didn't notice.",
     "a `global` statement: the flag that a function has too much reach and too little shame.",
-    "`global` used. functions should take arguments and return values. that's the deal.",
+    "a `global` statement: the codebase just became a little harder to reason about. again.",
     "found `global`. shared mutable state and a deadline — two things that end badly together.",
 ]
 
@@ -87,8 +87,8 @@ class GlobalStatementRule(VibRule):
 # ── VIB091 — eval() ──────────────────────────────────────────────────────────
 
 _EVAL_MESSAGES = [
-    "`eval()` executes arbitrary code. if you know what you're doing, you don't need it.",
-    "found `eval()`. whatever you're parsing, there is a safer way. find it.",
+    "`eval()` — the escape hatch that opens directly onto a security incident.",
+    "you reached for `eval()`. this is where the postmortem starts.",
     "`eval()` is a code injection vulnerability that hasn't happened yet.",
     "using `eval()` is trusting the input more than the codebase deserves.",
 ]
@@ -119,7 +119,7 @@ class EvalUsedRule(VibRule):
 # ── VIB092 — exec() ──────────────────────────────────────────────────────────
 
 _EXEC_MESSAGES = [
-    "`exec()` runs strings as code. strings are not code. or they are, and that's the problem.",
+    "`exec()` — you gave the string a compiler and a press badge and wished it luck.",
     "found `exec()`. this is not a templating engine. it is a disaster waiting for input.",
     "`exec()` detected. the security review is going to be a lot of fun.",
     "using `exec()` means you ran out of ideas and decided the string was the idea.",
@@ -151,9 +151,9 @@ class ExecUsedRule(VibRule):
 # ── VIB094 — file longer than 500 lines ─────────────────────────────────────
 
 _FILE_TOO_LONG_MESSAGES = [
-    "this file is {n} lines long. a file is not a novel. split it.",
+    "{n} lines in one file. you built a city and called it a street address.",
     "{n} lines in one file. that's not a module, that's a monolith with an extension.",
-    "file has {n} lines. files above 500 lines have given up on cohesion.",
+    "file at {n} lines: long enough to have districts, neighborhoods, and feuds.",
     "{n} lines detected. at some point a file becomes a problem. that point was 500 lines ago.",
 ]
 
@@ -183,13 +183,14 @@ class FileTooLongRule(VibRule):
 # ── VIB095 — nested comprehension 3+ levels ──────────────────────────────────
 
 _NESTED_COMPREHENSION_MESSAGES = [
-    "comprehension nested 3+ levels deep. you've made something unreadable and called it clever.",
-    "3+ levels of comprehension nesting: you can write it. nobody else can read it. that's the problem.",
-    "nested comprehension hell detected. extract a variable. write a loop. be kind.",
+    "3 layers of comprehension nesting. you can read it once, today, while you still remember what you were thinking.",
+    "comprehension at depth 3+. elegant on the outside. impenetrable from any angle.",
+    "nested comprehension stacked 3+ deep. this is a puzzle, not a feature.",
     "comprehensions nested this deep are a debugging session nobody wants to schedule.",
 ]
 
 _COMP_TYPES = (ast.ListComp, ast.SetComp, ast.GeneratorExp, ast.DictComp)
+_NESTED_COMP_MIN_DEPTH = 3
 
 
 def _max_comp_depth_in(node: ast.AST) -> int:
@@ -228,7 +229,7 @@ class NestedComprehensionRule(VibRule):
         errors: list[VibError] = []
         for node in ast.walk(tree):
             if isinstance(node, _COMP_TYPES):
-                if _comprehension_depth(node) >= 3:
+                if _comprehension_depth(node) >= _NESTED_COMP_MIN_DEPTH:
                     msg = random.choice(_NESTED_COMPREHENSION_MESSAGES)
                     prefix = f"VIB095 misc: {msg}"
                     errors.append((node.lineno, node.col_offset, prefix, type(self)))
@@ -238,9 +239,9 @@ class NestedComprehensionRule(VibRule):
 # ── VIB096 — dict() constructor ──────────────────────────────────────────────
 
 _DICT_CONSTRUCTOR_MESSAGES = [
-    "`dict(key=value)` — `{'key': value}` is shorter, faster, and obvious.",
+    "`dict(key=value)` — the constructor nobody asked for, doing the job a literal handles fine.",
     "using `dict()` with keywords instead of a literal. the braces were right there.",
-    "`dict(a=1, b=2)` is `{'a': 1, 'b': 2}` with more typing and worse performance.",
+    "`dict(a=1, b=2)` — a constructor doing the work of a literal and doing it worse.",
     "found `dict()` constructor with keywords. a dict literal would have been fine.",
 ]
 
@@ -273,7 +274,7 @@ class DictConstructorRule(VibRule):
 _LIST_AROUND_LITERAL_MESSAGES = [
     "`list([...])` — you already had a list. you made another list of the list.",
     "wrapping a list literal in `list()` is redundant and slightly insulting.",
-    "`list([1, 2, 3])` is `[1, 2, 3]` with extra steps and no benefits.",
+    "`list([...])` — a list, wrapped in a list constructor, for no reward and no reason.",
     "found `list([...])`. the brackets were doing fine on their own.",
 ]
 
@@ -305,10 +306,10 @@ class ListAroundLiteralRule(VibRule):
 # ── VIB098 — assert in non-test code ─────────────────────────────────────────
 
 _ASSERT_NON_TEST_MESSAGES = [
-    "`assert` in production code is removed by `-O`. your invariant just stopped existing.",
-    "found `assert` outside tests. assertions are not validation. use an `if` and raise.",
-    "`assert` in non-test code can be silenced with `python -O`. that is not a feature.",
-    "production `assert` — removed by the optimizer, violated by the user. use a real check.",
+    "`assert` in production: a boundary condition that vanishes the moment someone runs python with a flag.",
+    "`assert` outside tests: a guard that can be silenced and a guarantee that can't be trusted.",
+    "`assert` in production code: an invariant that only holds if nobody optimizes the interpreter.",
+    "production `assert` — a condition that exists when convenient and evaporates when optimized.",
 ]
 
 
@@ -335,8 +336,8 @@ class AssertInNonTestRule(VibRule):
 # ── VIB099 — sys.exit() ──────────────────────────────────────────────────────
 
 _SYS_EXIT_MESSAGES = [
-    "`sys.exit()` in library code exits the entire process. that's the caller's call to make.",
-    "found `sys.exit()`. raise an exception. let the top-level decide how to die.",
+    "`sys.exit()` in library code: an overreach with a scorched-earth policy and no survivors.",
+    "`sys.exit()` buried in a library. the whole process just got an opinion it didn't ask for.",
     "`sys.exit()` — a library function that decides it's done with everything. bold.",
     "calling `sys.exit()` in non-entry-point code is forcing the process to agree with you.",
 ]
@@ -364,3 +365,76 @@ class SysExitRule(VibRule):
                 prefix = f"VIB099 misc: {msg}"
                 errors.append((node.lineno, node.col_offset, prefix, type(self)))
         return errors
+
+
+# ── VIB093 — __all__ that includes private names ─────────────────────────────
+
+_ALL_PRIVATE_MESSAGES = [
+    "exporting `{name}` in `__all__` — names starting with `_` are private by convention. you're breaking the contract.",
+    "`__all__` includes `{name}`. private names in `__all__` is mixed messaging at the API boundary.",
+    "found `{name}` in `__all__`. underscores mean 'not public'. `__all__` means 'public'. pick one.",
+    "`{name}` is in `__all__` but starts with `_`. that's not an export, that's a contradiction.",
+]
+
+
+def _private_exports_in_assign(node: ast.Assign, rule_type: type) -> list[VibError]:
+    if not any(isinstance(t, ast.Name) and t.id == "__all__" for t in node.targets):
+        return []
+    if not isinstance(node.value, (ast.List, ast.Tuple)):
+        return []
+    errors: list[VibError] = []
+    for elt in node.value.elts:
+        if isinstance(elt, ast.Constant) and isinstance(elt.value, str) and elt.value.startswith("_"):
+            msg = random.choice(_ALL_PRIVATE_MESSAGES).format(name=elt.value)
+            errors.append((elt.lineno, elt.col_offset, f"VIB093 misc: {msg}", rule_type))
+    return errors
+
+
+class AllExportsPrivateRule(VibRule):
+    code = "VIB093"
+
+    def check(
+        self,
+        tree: ast.AST,
+        filename: str = "<unknown>",
+        lines: list[str] | None = None,
+    ) -> list[VibError]:
+        errors: list[VibError] = []
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Assign):
+                errors.extend(_private_exports_in_assign(node, type(self)))
+        return errors
+
+
+# ── VIB100 — zero-star repo energy ───────────────────────────────────────────
+
+_ZERO_STAR_MESSAGES = [
+    "this file has no functions, no classes, and is mostly print statements. that's a script, not a module.",
+    "found a file that's just print() calls with no structure. local legend, not a feature.",
+    "no functions. no classes. just print(). this is not software, it's a terminal session committed to git.",
+    "this file consists of print() calls and ambition. the ambition is not load-bearing.",
+]
+
+_ZERO_STAR_MIN_PRINTS = 5
+
+
+class ZeroStarRepoRule(VibRule):
+    code = "VIB100"
+
+    def check(
+        self,
+        tree: ast.AST,
+        filename: str = "<unknown>",
+        lines: list[str] | None = None,
+    ) -> list[VibError]:
+        all_nodes = list(ast.walk(tree))
+        has_structure = any(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) for n in all_nodes)
+        if has_structure:
+            return []
+        print_count = sum(
+            1 for n in all_nodes
+            if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "print"
+        )
+        if print_count >= _ZERO_STAR_MIN_PRINTS:
+            return [(1, 0, f"VIB100 misc: {random.choice(_ZERO_STAR_MESSAGES)}", type(self))]
+        return []
