@@ -162,9 +162,9 @@ def main() -> None:
     files = collect_python_files(Path(args.path))
     errors_by_file: dict[str, list[VibError]] = {str(f): check_file(f) for f in files}
     if args.json:
-        print(_format_json(errors_by_file))
+        sys.stdout.write(_format_json(errors_by_file) + "\n")
         return
     report = build_report(errors_by_file, total_files=len(files))
-    print(render_report(report, quiet=args.quiet, color=sys.stdout.isatty()))
+    sys.stdout.write(render_report(report, quiet=args.quiet, color=sys.stdout.isatty()) + "\n")
     if report.score < args.threshold:
-        sys.exit(1)
+        raise SystemExit(1)

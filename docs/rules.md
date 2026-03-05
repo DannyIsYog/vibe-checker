@@ -444,3 +444,884 @@ if user != admin:
 ```
 VIB084 boolean chaos: `not x == y` is `x != y` with passive-aggressive energy and worse readability.
 ```
+
+---
+
+## `VIB003` — except-exception-cowardice
+
+**Severity:** warning
+
+`except Exception` is a typed version of a bare `except` that still catches everything worth catching. You typed a word. You get no credit for it. The exception you actually expect has a name. Use it.
+
+```python
+# Bad
+try:
+    connect()
+except Exception:
+    retry()
+
+# Good
+try:
+    connect()
+except ConnectionError:
+    retry()
+```
+
+```
+VIB003 exception: `except Exception` is a coward's `except:` wearing a tie.
+```
+
+---
+
+## `VIB006` — generic-raise
+
+**Severity:** warning
+
+`raise Exception("something went wrong")` is the error message equivalent of naming a file `file.txt`. Your callers can't catch it specifically. Your logs can't filter it. A specific exception type costs one word and earns infinite goodwill.
+
+```python
+# Bad
+raise Exception("something went wrong")
+
+# Good
+raise ValueError("expected a positive integer, got -1")
+```
+
+```
+VIB006 exception: `raise Exception(...)` — so you know something went wrong but not what. bold.
+```
+
+---
+
+## `VIB008` — print-left-behind
+
+**Severity:** warning
+
+A `print()` in committed code is a debugging session that survived the review. It is not logging. It is not telemetry. It is the ghost of a panic that never got cleaned up.
+
+```python
+# Bad
+def process(data):
+    print("got here")
+    return transform(data)
+
+# Good
+def process(data):
+    return transform(data)
+```
+
+```
+VIB008 debug: `print()` in production code is a confession you didn't write tests.
+```
+
+---
+
+## `VIB009` — breakpoint-left-behind
+
+**Severity:** warning
+
+`breakpoint()` committed to the codebase is a debugging session that made it to production. It will pause the process and wait for a human who is not coming.
+
+```python
+# Bad
+def tricky_function():
+    breakpoint()
+    return result
+
+# Good
+def tricky_function():
+    return result
+```
+
+```
+VIB009 debug: `breakpoint()` committed to the codebase. you had one job.
+```
+
+---
+
+## `VIB010` — pdb-set-trace
+
+**Severity:** warning
+
+`pdb.set_trace()` is the pre-`breakpoint()` way to halt production. Both are equally inexcusable. This one just has more nostalgia attached to it.
+
+```python
+# Bad
+import pdb
+pdb.set_trace()
+
+# Good
+# nothing. the debugger should not be in the code.
+```
+
+```
+VIB010 debug: `pdb.set_trace()` committed. the 90s called and they want their debugger back.
+```
+
+---
+
+## `VIB011` — import-pdb
+
+**Severity:** warning
+
+Importing `pdb` is evidence that a debugging session happened and nobody cleaned up. The import serves no purpose in production code. Delete it.
+
+```python
+# Bad
+import pdb
+from pdb import set_trace
+
+# Good
+# no pdb in sight
+```
+
+```
+VIB011 debug: you imported `pdb`. you forgot to remove it. these two facts are related.
+```
+
+---
+
+## `VIB021` — commented-code-graveyard
+
+**Severity:** warning
+
+Three or more consecutive lines that look like commented-out code are a code graveyard. Git exists for this. Branches exist for this. A comment block is not version control.
+
+```python
+# Bad
+# x = old_value
+# y = compute_old(x)
+# z = transform(x, y)
+
+# Good
+# (just delete the old code; git has it)
+```
+
+```
+VIB021 comment: git exists. use it. delete the corpse.
+```
+
+---
+
+## `VIB022` — type-ignore-no-explanation
+
+**Severity:** warning
+
+A `# type: ignore` without a following comment is a suppression without an explanation. You told mypy to look away. At least say why.
+
+```python
+# Bad
+x = bad_function()  # type: ignore
+
+# Good
+x = bad_function()  # type: ignore[assignment]  # returns Any due to dynamic dispatch
+```
+
+```
+VIB022 comment: silent type-ignore with no explanation is a lie you're asking mypy to sign off on.
+```
+
+---
+
+## `VIB023` — noqa-no-code
+
+**Severity:** warning
+
+`# noqa` with no error code suppresses every linter check on the line. Name what you're suppressing or explain why the violation is acceptable.
+
+```python
+# Bad
+very_long_function_call(with_many_arguments, that_exceed_line_length)  # noqa
+
+# Good
+very_long_function_call(with_many_arguments, that_exceed_line_length)  # noqa: E501
+```
+
+```
+VIB023 comment: bare noqa suppresses everything. specify what you're ignoring or fix it.
+```
+
+---
+
+## `VIB024` — todo-named
+
+**Severity:** warning
+
+A `TODO(name)` assigns work to a person in a comment. That person has not done it. The comment remains. The work remains. This is not a ticket system.
+
+```python
+# Bad
+# TODO(alice): fix edge case handling
+
+# Good
+# TODO: fix edge case handling — tracked in GH-1234
+```
+
+```
+VIB024 comment: TODO assigned to alice. has alice seen this? has alice done anything about it? no.
+```
+
+---
+
+## `VIB026` — hack-comment
+
+**Severity:** warning
+
+A `# hack` comment is a bug with a disclaimer attached. You knew it was wrong when you wrote it. You know it now. The comment has not made it better.
+
+```python
+# Bad
+# hack: multiply by 2 to compensate for the off-by-one somewhere upstream
+result = value * 2
+
+# Good
+# compensate for upstream doubling in legacy_processor (see GH-42)
+result = value * 2
+```
+
+```
+VIB026 comment: a hack-tagged comment is a bug with a disclaimer attached.
+```
+
+---
+
+## `VIB027` — do-not-touch
+
+**Severity:** warning
+
+`# do not touch` is a request made by someone who understood the code and has since left. Anything that cannot be touched cannot be maintained. If you're afraid of it, rewrite it.
+
+```python
+# Bad
+# DO NOT TOUCH - things break if you change this
+_magic_constant = 42
+
+# Good
+# this value is derived from the legacy batch size (see docs/batch_sizing.md)
+_magic_constant = 42
+```
+
+```
+VIB027 comment: the 'do not touch' comment means code you're afraid of — code you need to delete or rewrite.
+```
+
+---
+
+## `VIB028` — this-is-fine
+
+**Severity:** warning
+
+`# this is fine` is the comment of someone watching their code on fire and choosing not to act. It is not documentation. It is a coping mechanism.
+
+```python
+# Bad
+except Exception:
+    pass  # this is fine
+
+# Good
+except SpecificError:
+    logger.warning("handled expected error", exc_info=True)
+```
+
+```
+VIB028 comment: the 'this is fine' comment — the universal sign of someone watching things burn.
+```
+
+---
+
+## `VIB029` — lol-wtf-comment
+
+**Severity:** warning
+
+`# lol` means you found something funny. `# wtf` means you found something alarming. Neither is an explanation. Write what you actually mean.
+
+```python
+# Bad
+# lol
+# wtf is this
+
+# Good
+# this returns a string in dev and an int in prod — see GH-99 for the fix
+```
+
+```
+VIB029 comment: a lol-comment in your code means even you don't take it seriously.
+```
+
+---
+
+## `VIB048` — star-import
+
+**Severity:** warning
+
+`from x import *` brings every name from `x` into your namespace and documents none of them. Six months from now nobody will know where `parse_config` came from. Import what you need by name.
+
+```python
+# Bad
+from utils import *
+
+# Good
+from utils import parse_config, validate_schema
+```
+
+```
+VIB048 import: `import *` pollutes the namespace with everything and documents nothing.
+```
+
+---
+
+## `VIB051` — import-in-function
+
+**Severity:** warning
+
+An import inside a function is a top-level import that couldn't commit. It hides dependencies, adds overhead on every call, and confuses readers expecting to find imports at the top.
+
+```python
+# Bad
+def get_config():
+    import json
+    return json.loads(raw)
+
+# Good
+import json
+
+def get_config():
+    return json.loads(raw)
+```
+
+```
+VIB051 import: importing inside a function delays the problem, it doesn't solve it.
+```
+
+---
+
+## `VIB053` — explicit-return-none
+
+**Severity:** warning
+
+`return None` at the end of a function is redundant. Python already returns `None` when a function ends without a value. A bare `return` is cleaner. Silence is also fine.
+
+```python
+# Bad
+def send_email(address):
+    deliver(address)
+    return None
+
+# Good
+def send_email(address):
+    deliver(address)
+```
+
+```
+VIB053 return: `return None` is the statement of a function that doesn't know how to end gracefully.
+```
+
+---
+
+## `VIB054` — assign-then-return
+
+**Severity:** warning
+
+Assigning a variable only to return it on the next line adds nothing. The variable had a zero-line lifespan. Return the expression directly.
+
+```python
+# Bad
+def get_total(items):
+    result = sum(items)
+    return result
+
+# Good
+def get_total(items):
+    return sum(items)
+```
+
+```
+VIB054 return: assign then immediately return — just return the expression. the variable adds nothing.
+```
+
+---
+
+## `VIB055` — mutable-default-argument
+
+**Severity:** warning
+
+A mutable default argument (`[]`, `{}`, `set()`) is shared across every call to the function. Mutations in one call persist into the next. This is never what you wanted and always what you got.
+
+```python
+# Bad
+def append_to(item, target=[]):
+    target.append(item)
+    return target
+
+# Good
+def append_to(item, target=None):
+    if target is None:
+        target = []
+    target.append(item)
+    return target
+```
+
+```
+VIB055 return: mutable default argument — this list is shared across every call. that is never what you wanted.
+```
+
+---
+
+## `VIB056` — shadow-builtin
+
+**Severity:** warning
+
+Naming a variable `list`, `dict`, `str`, `len`, or any other builtin replaces it in the local scope. Every subsequent call to `list()` now calls your variable. This is not clever. This is a trap.
+
+```python
+# Bad
+list = [1, 2, 3]
+len = 42
+
+# Good
+items = [1, 2, 3]
+item_count = 42
+```
+
+```
+VIB056 return: `list` is a builtin. you just overwrote it. your future `list()` calls thank you for the confusion.
+```
+
+---
+
+## `VIB063` — multiple-inheritance
+
+**Severity:** warning
+
+Inheriting from 3 or more classes creates a method resolution order that even the developers of MRO would struggle to reason about. Each additional base class is another set of assumptions you now have to honor forever.
+
+```python
+# Bad
+class Handler(BaseHandler, LogMixin, ValidationMixin, CacheMixin):
+    ...
+
+# Good
+class Handler(BaseHandler):
+    def __init__(self):
+        self._log = Logger()
+        self._validator = Validator()
+```
+
+```
+VIB063 class: inheriting from 4 classes means 4 sets of assumptions you now have to honor. good luck.
+```
+
+---
+
+## `VIB069` — test-no-assertion
+
+**Severity:** warning
+
+A test function with no assertions is a test that cannot fail. A test that cannot fail proves nothing. Green means nothing if the bar is on the floor.
+
+```python
+# Bad
+def test_process():
+    result = process(data)
+    # forgot to assert
+
+# Good
+def test_process():
+    result = process(data)
+    assert result == expected
+```
+
+```
+VIB069 test: `test_process` runs but never asserts anything. a test that can't fail can't prove anything.
+```
+
+---
+
+## `VIB070` — test-named-test-it
+
+**Severity:** warning
+
+`test_it` is a test name that tests nothing but the reader's patience. What does it test? What is "it"? A test name should describe what it's testing and under what conditions.
+
+```python
+# Bad
+def test_it():
+    assert process(1) == 1
+
+# Good
+def test_process_returns_input_unchanged():
+    assert process(1) == 1
+```
+
+```
+VIB070 test: `test_it` — it. it what? what does it do? what did you test?
+```
+
+---
+
+## `VIB071` — assert-true
+
+**Severity:** warning
+
+`assert True` is a test that proves `True` is `True`. It always passes. It means nothing. If you need to document that you've reached a code path, use a comment. This is not that.
+
+```python
+# Bad
+def test_something():
+    assert True
+
+# Good
+def test_something():
+    assert compute() == expected_value
+```
+
+```
+VIB071 test: `assert True` always passes. it proves nothing. it tests nothing. why is it here.
+```
+
+---
+
+## `VIB072` — time-sleep-in-test
+
+**Severity:** warning
+
+`time.sleep()` in a test is a guess wearing a timer. You're hoping the thing you're waiting for will be done by then. It won't be. On CI. On the slowest day. Mock the time or mock the dependency.
+
+```python
+# Bad
+def test_retry_logic():
+    trigger_retry()
+    time.sleep(2)
+    assert result_received()
+
+# Good
+def test_retry_logic(mock_time):
+    trigger_retry()
+    mock_time.advance(2)
+    assert result_received()
+```
+
+```
+VIB072 test: found `time.sleep()` in a test. flaky tests have a sleep in them. this is a flaky test.
+```
+
+---
+
+## `VIB074` — async-no-await
+
+**Severity:** warning
+
+An `async def` function that never uses `await` is a synchronous function with extra overhead and false advertising. Either add an `await` or remove the `async`.
+
+```python
+# Bad
+async def get_name():
+    return "alice"
+
+# Good
+def get_name():
+    return "alice"
+```
+
+```
+VIB074 async: async function with no `await` — this is a synchronous function wearing a costume.
+```
+
+---
+
+## `VIB076` — asyncio-sleep-zero
+
+**Severity:** warning
+
+`asyncio.sleep(0)` yields control to the event loop. This is sometimes necessary but almost always undocumented. The next reader will not know why this sleep is here. Document the intent.
+
+```python
+# Bad
+await asyncio.sleep(0)
+
+# Good
+await asyncio.sleep(0)  # yield to event loop to allow pending callbacks to run
+```
+
+```
+VIB076 async: `asyncio.sleep(0)` is a yield to the event loop disguised as a nap.
+```
+
+---
+
+## `VIB077` — string-concat-in-loop
+
+**Severity:** warning
+
+String `+=` inside a loop creates a new string on every iteration. For `n` iterations, you allocate `n` strings. `''.join(parts)` allocates one. Use `join`.
+
+```python
+# Bad
+result = ""
+for item in items:
+    result += str(item)
+
+# Good
+result = "".join(str(item) for item in items)
+```
+
+```
+VIB077 string: string `+=` in a loop is O(n²) performance and a betrayal of `str.join`.
+```
+
+---
+
+## `VIB078` — percent-format
+
+**Severity:** warning
+
+`%` string formatting is Python 2 syntax that never quite went away. f-strings exist. They're faster, more readable, and don't require you to count `%s` placeholders.
+
+```python
+# Bad
+msg = "hello %s, you have %d messages" % (name, count)
+
+# Good
+msg = f"hello {name}, you have {count} messages"
+```
+
+```
+VIB078 string: `%` string formatting hasn't been recommended since Python 2. let go.
+```
+
+---
+
+## `VIB079` — format-positional
+
+**Severity:** warning
+
+`.format()` with positional arguments requires you to count curly braces and match them to arguments by index. f-strings do the same thing with less ceremony and more readability.
+
+```python
+# Bad
+msg = "hello {}, you have {} messages".format(name, count)
+
+# Good
+msg = f"hello {name}, you have {count} messages"
+```
+
+```
+VIB079 string: `.format()` with positional args — an f-string would have been shorter and readable.
+```
+
+---
+
+## `VIB089` — lambda-assigned
+
+**Severity:** warning
+
+A lambda assigned to a variable is an anonymous function that immediately got a name. At that point it's just a function. Use `def`. The lambda was not saving you anything.
+
+```python
+# Bad
+double = lambda x: x * 2
+
+# Good
+def double(x):
+    return x * 2
+```
+
+```
+VIB089 misc: lambda assigned to a variable is a function that's embarrassed to be one. use `def`.
+```
+
+---
+
+## `VIB090` — global-statement
+
+**Severity:** warning
+
+`global` is what you write when a function needs to modify state it shouldn't own. Functions take arguments and return values. That's the deal. Pass the state in, pass the result out.
+
+```python
+# Bad
+count = 0
+
+def increment():
+    global count
+    count += 1
+
+# Good
+def increment(count):
+    return count + 1
+```
+
+```
+VIB090 misc: `global` is a way of saying 'i couldn't figure out how to pass this as an argument'.
+```
+
+---
+
+## `VIB091` — eval-used
+
+**Severity:** warning
+
+`eval()` executes arbitrary Python code from a string. If the string comes from user input, you have a code injection vulnerability. If it comes from your own code, you have an architecture problem.
+
+```python
+# Bad
+result = eval(user_expression)
+
+# Good
+result = safe_eval(user_expression)  # use ast.literal_eval or a proper parser
+```
+
+```
+VIB091 misc: `eval()` executes arbitrary code. if you know what you're doing, you don't need it.
+```
+
+---
+
+## `VIB092` — exec-used
+
+**Severity:** warning
+
+`exec()` runs strings as Python code. Whatever you're doing with it, there is a safer, more explicit way to do it. Find that way.
+
+```python
+# Bad
+exec(f"result_{name} = compute()")
+
+# Good
+results[name] = compute()
+```
+
+```
+VIB092 misc: `exec()` runs strings as code. strings are not code. or they are, and that's the problem.
+```
+
+---
+
+## `VIB094` — file-too-long
+
+**Severity:** warning
+
+A file with more than 500 lines has stopped being a module and started being a monolith. Cohesion has left the building. Split it.
+
+```python
+# Bad
+# my_module.py — 800 lines of loosely related functions
+
+# Good
+# my_module/
+#   core.py
+#   utils.py
+#   models.py
+```
+
+```
+VIB094 misc: 623 lines in one file. that's not a module, that's a monolith with an extension.
+```
+
+---
+
+## `VIB095` — nested-comprehension
+
+**Severity:** warning
+
+A comprehension nested 3 or more levels deep is something you can write and nobody else can read. Extract intermediate results into variables or loops. Be kind to the next person.
+
+```python
+# Bad
+result = [x for xs in [y for y in [z for z in data]] for x in xs]
+
+# Good
+layers = [z for z in data]
+flattened = [y for y in layers]
+result = [x for x in flattened]
+```
+
+```
+VIB095 misc: comprehension nested 3+ levels deep. you've made something unreadable and called it clever.
+```
+
+---
+
+## `VIB096` — dict-constructor
+
+**Severity:** warning
+
+`dict(key=value)` is slower than `{"key": value}` and harder to read. The literal syntax was designed for exactly this. Use it.
+
+```python
+# Bad
+config = dict(host="localhost", port=8080, debug=True)
+
+# Good
+config = {"host": "localhost", "port": 8080, "debug": True}
+```
+
+```
+VIB096 misc: `dict(key=value)` — `{'key': value}` is shorter, faster, and obvious.
+```
+
+---
+
+## `VIB097` — list-around-literal
+
+**Severity:** warning
+
+`list([1, 2, 3])` is `[1, 2, 3]` with extra steps. You already had a list. You made another list of the list. The brackets were doing fine on their own.
+
+```python
+# Bad
+items = list([1, 2, 3])
+
+# Good
+items = [1, 2, 3]
+```
+
+```
+VIB097 misc: `list([...])` — you already had a list. you made another list of the list.
+```
+
+---
+
+## `VIB098` — assert-in-non-test
+
+**Severity:** warning
+
+`assert` statements are removed when Python is run with the `-O` flag. Your invariant just stopped existing in optimized production builds. Use an `if` with a proper exception.
+
+```python
+# Bad
+assert user_id > 0, "user_id must be positive"
+
+# Good
+if user_id <= 0:
+    raise ValueError(f"user_id must be positive, got {user_id}")
+```
+
+```
+VIB098 misc: `assert` in production code is removed by `-O`. your invariant just stopped existing.
+```
+
+---
+
+## `VIB099` — sys-exit
+
+**Severity:** warning
+
+`sys.exit()` in library code terminates the entire process. That's the caller's decision to make, not yours. Raise an exception and let the top-level handler decide how to die.
+
+```python
+# Bad
+def validate(config):
+    if not config:
+        sys.exit(1)
+
+# Good
+def validate(config):
+    if not config:
+        raise ConfigError("config is empty")
+```
+
+```
+VIB099 misc: `sys.exit()` in library code exits the entire process. that's the caller's call to make.
+```
+
