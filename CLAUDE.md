@@ -46,3 +46,5 @@ Use `npm run watch` to auto-recompile on save.
 # The code must vibe-check itself
 
 After every code change, run `vibe-check src/` and confirm the score is 100/100. If it isn't, fix the violations before considering the task done. The source code is not allowed to fail its own linter.
+
+Never suppress violations with `# noqa` in source files under `src/`. Fix the code. If a rule fires on its own constants or helpers, restructure — extract a named constant, shorten the function, rename the variable. The linter doesn't get a pass just because it's the one doing the linting.
