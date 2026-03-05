@@ -16,6 +16,12 @@ Bad examples:
 
 Every rule must define at least 2 messages and pick between them using `random.choice(messages)`.
 
+# Every new rule needs tests and docs
+
+When adding a new rule:
+1. Add a test file at `tests/rules/test_<rule_name>.py` covering both triggering and non-triggering cases, and edge cases.
+2. Add the rule to `docs/rules.md` with its code, name, what it catches, and an example violation.
+
 # VS Code extension development
 
 The extension lives in `vscode-extension/`. It is symlinked into `~/.vscode/extensions/vibe-checker` for local development — no repackaging or reinstalling needed.
