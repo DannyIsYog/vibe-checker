@@ -80,6 +80,31 @@ Verdict: decent energy
 
 ---
 
+## In the wild
+
+We ran `vibe-check` across 12 of the most beloved Python repos. No one was ready.
+
+| Repo | Files | Violations | Score | Verdict |
+|------|------:|-----------:|------:|---------|
+| [django](https://github.com/django/django) | 902 | 8,801 | 51/100 | concerning |
+| [flask](https://github.com/pallets/flask) | 24 | 608 | 0/100 | cooked |
+| [fastapi](https://github.com/tiangolo/fastapi) | 48 | 1,066 | 0/100 | cooked |
+| [pandas](https://github.com/pandas-dev/pandas) | 1,414 | 56,653 | 0/100 | expired |
+| [scikit-learn](https://github.com/scikit-learn/scikit-learn) | 631 | 26,277 | 0/100 | cooked |
+| [transformers](https://github.com/huggingface/transformers) | 2,476 | 54,012 | 0/100 | cooked |
+| [pip](https://github.com/pypa/pip) | 401 | 5,907 | 26/100 | this is a cry for help |
+| [ruff](https://github.com/astral-sh/ruff) | 14 | 136 | 51/100 | the vibes are questionable |
+| [pytest](https://github.com/pytest-dev/pytest) | 73 | 1,734 | 0/100 | it's giving dumpster fire |
+| [bottle](https://github.com/bottlepy/bottle) | 30 | 1,561 | 0/100 | cooked |
+| [requests](https://github.com/psf/requests) | 18 | 413 | 0/100 | it's giving dumpster fire |
+| [rich](https://github.com/Textualize/rich) | 100 | 1,552 | 22/100 | cooked |
+
+Django is the only one that cleared 50. Ruff lints everything except, apparently, itself. Pandas has 56,653 violations, which tracks.
+
+→ [Full report](reports/report.md)
+
+---
+
 ## Installation
 
 ```bash
