@@ -20,7 +20,7 @@ export function activate(context: vscode.ExtensionContext): void {
     const byLine = new Map<number, string[]>();
     for (const v of violations) {
       const msgs = byLine.get(v.line) ?? [];
-      msgs.push(`${v.code}: ${v.message}`);
+      msgs.push(v.message);
       byLine.set(v.line, msgs);
     }
     const decorations: vscode.DecorationOptions[] = [];
