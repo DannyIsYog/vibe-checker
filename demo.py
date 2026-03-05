@@ -146,3 +146,51 @@ class DataManager:
 class UserManager:
     def get(self, user_id):
         return user_id
+
+
+# --- structure & complexity showcase ---
+
+# VIB030: too many arguments — that's not a function, that's a meeting agenda
+def create_user(name, email, age, role, team, department, timezone):
+    return {"name": name, "email": email, "role": role}
+
+
+# VIB031: deep nesting — the pyramid of doom
+def find_admin_active_item(users):
+    for user in users:
+        if user["active"]:
+            if user["role"] == "admin":
+                for item in user["items"]:
+                    if item["enabled"]:
+                        return item
+    return None
+
+
+# VIB032: too many return statements — commitment issues
+def classify(value):
+    if value < 0:
+        return "negative"
+    if value == 0:
+        return "zero"
+    if value < 10:
+        return "small"
+    if value < 100:
+        return "medium"
+    return "large"
+
+
+# VIB033: bare except — catches everything including your future regrets
+def load_config(path):
+    try:
+        with open(path) as f:
+            return f.read()
+    except:  # noqa: E722
+        return None
+
+
+# VIB034: empty except — a suppressed scream
+def parse_int(value):
+    try:
+        return int(value)
+    except ValueError:
+        pass
