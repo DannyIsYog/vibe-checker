@@ -89,6 +89,25 @@ _DOC_NO_PERIOD_MESSAGES = [
 ]
 
 
+def _get_class_docstring(node: ast.ClassDef) -> str | None:
+    if (
+        node.body
+        and isinstance(node.body[0], ast.Expr)
+        and isinstance(node.body[0].value, ast.Constant)
+        and isinstance(node.body[0].value.value, str)
+    ):
+        return node.body[0].value.value
+    return
+
+
+def _get_any_docstring(
+    node: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef,
+) -> str | None:
+    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        return _get_docstring(node)
+    return _get_class_docstring(node)
+
+
 class DocstringNoPeriodRule(VibRule):
     code = "VIB086"
 
@@ -102,10 +121,7 @@ class DocstringNoPeriodRule(VibRule):
         for node in ast.walk(tree):
             if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
                 continue
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                doc = _get_docstring(node)
-            else:
-                doc = _get_class_docstring(node)
+            doc = _get_any_docstring(node)
             if doc is None:
                 continue
             summary = doc.strip().split("\n")[0].rstrip()
@@ -115,17 +131,6 @@ class DocstringNoPeriodRule(VibRule):
                 prefix = f"VIB086 docstring: {msg}"
                 errors.append((node.lineno, node.col_offset, prefix, type(self)))
         return errors
-
-
-def _get_class_docstring(node: ast.ClassDef) -> str | None:
-    if (
-        node.body
-        and isinstance(node.body[0], ast.Expr)
-        and isinstance(node.body[0].value, ast.Constant)
-        and isinstance(node.body[0].value.value, str)
-    ):
-        return node.body[0].value.value
-    return
 
 
 # ── VIB087 — Args section that doesn't match actual parameters ───────────────
@@ -141,8 +146,22 @@ _ARGS_SECTION_RE = re.compile(r"^\s*Args?\s*:\s*$", re.MULTILINE)
 _ARG_LINE_RE = re.compile(r"^\s{4,}(\w+)\s*:")
 
 
+def _parse_args_line(
+    line: str, stripped: str, args: set[str], base_indent: int | None
+) -> tuple[bool, int | None]:
+    if re.match(r"^\w.*:$", stripped) and not re.match(r"^\s{4}", line):
+        return True, base_indent
+    if stripped:
+        arg_match = _ARG_LINE_RE.match(line)
+        if arg_match:
+            indent = len(line) - len(line.lstrip())
+            base_indent = indent if base_indent is None else base_indent
+            if indent == base_indent:
+                args.add(arg_match.group(1))
+    return False, base_indent
+
+
 def _parse_docstring_args(docstring: str) -> set[str]:
-    """Extract parameter names from a Google-style Args: section."""
     lines = docstring.split("\n")
     args: set[str] = set()
     in_args = False
@@ -154,18 +173,9 @@ def _parse_docstring_args(docstring: str) -> set[str]:
             base_indent = None
             continue
         if in_args:
-            if not line.strip():
-                continue
-            # Detect end of Args section (new section header at low indent)
-            if re.match(r"^\w.*:$", stripped) and not re.match(r"^\s{4}", line):
+            should_break, base_indent = _parse_args_line(line, stripped, args, base_indent)
+            if should_break:
                 break
-            arg_match = _ARG_LINE_RE.match(line)
-            if arg_match:
-                indent = len(line) - len(line.lstrip())
-                if base_indent is None:
-                    base_indent = indent
-                if indent == base_indent:
-                    args.add(arg_match.group(1))
     return args
 
 
@@ -182,6 +192,27 @@ def _get_param_names(func: ast.FunctionDef | ast.AsyncFunctionDef) -> set[str]:
     return names
 
 
+def _check_args_mismatch(
+    node: ast.FunctionDef | ast.AsyncFunctionDef, rule_type: type
+) -> list[VibError]:
+    doc = _get_docstring(node)
+    if doc is None or "Args" not in doc:
+        return []
+    doc_args = _parse_docstring_args(doc)
+    if not doc_args:
+        return []
+    real_params = _get_param_names(node)
+    extra = doc_args - real_params
+    errors: list[VibError] = []
+    for arg_name in sorted(extra):
+        msg = random.choice(_DOC_ARGS_MISMATCH_MESSAGES).format(
+            name=node.name, extra=arg_name
+        )
+        prefix = f"VIB087 docstring: {msg}"
+        errors.append((node.lineno, node.col_offset, prefix, rule_type))
+    return errors
+
+
 class DocstringArgsMismatchRule(VibRule):
     code = "VIB087"
 
@@ -195,20 +226,7 @@ class DocstringArgsMismatchRule(VibRule):
         for node in ast.walk(tree):
             if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 continue
-            doc = _get_docstring(node)
-            if doc is None or "Args" not in doc:
-                continue
-            doc_args = _parse_docstring_args(doc)
-            if not doc_args:
-                continue
-            real_params = _get_param_names(node)
-            extra = doc_args - real_params
-            for arg_name in sorted(extra):
-                msg = random.choice(_DOC_ARGS_MISMATCH_MESSAGES).format(
-                    name=node.name, extra=arg_name
-                )
-                prefix = f"VIB087 docstring: {msg}"
-                errors.append((node.lineno, node.col_offset, prefix, type(self)))
+            errors.extend(_check_args_mismatch(node, type(self)))
         return errors
 
 
@@ -226,6 +244,23 @@ def _count_docstring_lines(doc: str) -> int:
     return doc.count("\n") + 1
 
 
+def _check_doc_longer(
+    node: ast.FunctionDef | ast.AsyncFunctionDef, rule_type: type
+) -> VibError | None:
+    doc = _get_docstring(node)
+    if doc is None:
+        return
+    doc_lines = _count_docstring_lines(doc)
+    total_lines = (node.end_lineno or node.lineno) - node.lineno
+    body_lines = total_lines - doc_lines
+    if body_lines < 1 or doc_lines <= body_lines:
+        return
+    msg = random.choice(_DOC_LONGER_THAN_FUNC_MESSAGES).format(
+        name=node.name, doc_lines=doc_lines, body_lines=body_lines
+    )
+    return (node.lineno, node.col_offset, f"VIB088 docstring: {msg}", rule_type)
+
+
 class DocstringLongerThanFunctionRule(VibRule):
     code = "VIB088"
 
@@ -239,19 +274,7 @@ class DocstringLongerThanFunctionRule(VibRule):
         for node in ast.walk(tree):
             if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 continue
-            doc = _get_docstring(node)
-            if doc is None:
-                continue
-            doc_lines = _count_docstring_lines(doc)
-            # total_lines = end - start = lines after the def line
-            total_lines = (node.end_lineno or node.lineno) - node.lineno
-            body_lines = total_lines - doc_lines
-            if body_lines < 1:
-                continue
-            if doc_lines > body_lines:
-                msg = random.choice(_DOC_LONGER_THAN_FUNC_MESSAGES).format(
-                    name=node.name, doc_lines=doc_lines, body_lines=body_lines
-                )
-                prefix = f"VIB088 docstring: {msg}"
-                errors.append((node.lineno, node.col_offset, prefix, type(self)))
+            err = _check_doc_longer(node, type(self))
+            if err is not None:
+                errors.append(err)
         return errors

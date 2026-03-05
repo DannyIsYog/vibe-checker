@@ -196,6 +196,33 @@ def _is_numeric_literal(node: ast.AST) -> float | int | None:
     return
 
 
+def _check_sleep_call(node: ast.Call, rule_type: type) -> VibError | None:
+    if not (
+        isinstance(node.func, ast.Attribute)
+        and node.func.attr == "sleep"
+        and isinstance(node.func.value, ast.Name)
+        and node.func.value.id == "time"
+        and node.args
+    ):
+        return
+    val = _is_numeric_literal(node.args[0])
+    if val is not None and val > 0:
+        msg = random.choice(_HARDCODED_TIMEOUT_MESSAGES).format(n=val)
+        return (node.lineno, node.col_offset, f"VIB045 hardcoding: {msg}", rule_type)
+    return
+
+
+def _check_timeout_kw(node: ast.Call, rule_type: type) -> list[VibError]:
+    errors: list[VibError] = []
+    for kw in node.keywords:
+        if kw.arg == "timeout":
+            val = _is_numeric_literal(kw.value)
+            if val is not None:
+                msg = random.choice(_TIMEOUT_KW_MESSAGES).format(n=val)
+                errors.append((kw.value.lineno, kw.value.col_offset, f"VIB045 hardcoding: {msg}", rule_type))
+    return errors
+
+
 class HardcodedTimeoutRule(VibRule):
     code = "VIB045"
 
@@ -209,27 +236,10 @@ class HardcodedTimeoutRule(VibRule):
         for node in ast.walk(tree):
             if not isinstance(node, ast.Call):
                 continue
-            # time.sleep(X)
-            if (
-                isinstance(node.func, ast.Attribute)
-                and node.func.attr == "sleep"
-                and isinstance(node.func.value, ast.Name)
-                and node.func.value.id == "time"
-                and node.args
-            ):
-                val = _is_numeric_literal(node.args[0])
-                if val is not None and val > 0:
-                    msg = random.choice(_HARDCODED_TIMEOUT_MESSAGES).format(n=val)
-                    prefix = f"VIB045 hardcoding: {msg}"
-                    errors.append((node.lineno, node.col_offset, prefix, type(self)))
-            # timeout=X keyword argument
-            for kw in node.keywords:
-                if kw.arg == "timeout":
-                    val = _is_numeric_literal(kw.value)
-                    if val is not None:
-                        msg = random.choice(_TIMEOUT_KW_MESSAGES).format(n=val)
-                        prefix = f"VIB045 hardcoding: {msg}"
-                        errors.append((kw.value.lineno, kw.value.col_offset, prefix, type(self)))
+            err = _check_sleep_call(node, type(self))
+            if err is not None:
+                errors.append(err)
+            errors.extend(_check_timeout_kw(node, type(self)))
         return errors
 
 
@@ -249,6 +259,23 @@ _CRED_NAMES = frozenset({
 })
 
 
+def _check_cred_assign(node: ast.Assign, rule_type: type) -> list[VibError]:
+    errors: list[VibError] = []
+    for target in node.targets:
+        if not isinstance(target, ast.Name):
+            continue
+        if target.id.lower() not in _CRED_NAMES:
+            continue
+        if (
+            isinstance(node.value, ast.Constant)
+            and isinstance(node.value.value, str)
+            and node.value.value.strip()
+        ):
+            msg = random.choice(_HARDCODED_CREDS_MESSAGES).format(name=target.id)
+            errors.append((node.lineno, node.col_offset, f"VIB046 hardcoding: {msg}", rule_type))
+    return errors
+
+
 class HardcodedCredentialsRule(VibRule):
     code = "VIB046"
 
@@ -260,22 +287,8 @@ class HardcodedCredentialsRule(VibRule):
     ) -> list[VibError]:
         errors: list[VibError] = []
         for node in ast.walk(tree):
-            if not isinstance(node, ast.Assign):
-                continue
-            for target in node.targets:
-                if not isinstance(target, ast.Name):
-                    continue
-                name = target.id.lower()
-                if name not in _CRED_NAMES:
-                    continue
-                if (
-                    isinstance(node.value, ast.Constant)
-                    and isinstance(node.value.value, str)
-                    and node.value.value.strip()
-                ):
-                    msg = random.choice(_HARDCODED_CREDS_MESSAGES).format(name=target.id)
-                    prefix = f"VIB046 hardcoding: {msg}"
-                    errors.append((node.lineno, node.col_offset, prefix, type(self)))
+            if isinstance(node, ast.Assign):
+                errors.extend(_check_cred_assign(node, type(self)))
         return errors
 
 
