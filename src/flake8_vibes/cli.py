@@ -3,7 +3,9 @@ from __future__ import annotations
 import argparse
 import ast
 import json
+import os
 import sys
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 from flake8_vibes.rules import ALL_RULES, VibError
@@ -177,7 +179,10 @@ def _build_arg_parser() -> argparse.ArgumentParser:
 def main() -> None:
     args = _build_arg_parser().parse_args()
     files = collect_python_files(Path(args.path))
-    errors_by_file: dict[str, list[VibError]] = {str(f): check_file(f) for f in files}
+    workers = min(os.cpu_count() or 1, len(files)) if len(files) > 1 else 1
+    with ProcessPoolExecutor(max_workers=workers) as pool:
+        results = list(pool.map(check_file, files))
+    errors_by_file: dict[str, list[VibError]] = {str(f): r for f, r in zip(files, results)}
     if args.json:
         sys.stdout.write(_format_json(errors_by_file) + "\n")
         return
