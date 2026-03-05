@@ -83,3 +83,66 @@ def check_status(is_active, value, result, user):
     # VIB084: not x == y instead of x != y
     if not result == 42:
         print("wrong answer")
+
+
+# --- naming crimes showcase ---
+
+# VIB013: god variables — names that hold everything and mean nothing
+def process_request(payload):
+    data = payload.get("body")
+    result = data["items"]
+    info = result[0]
+    return info
+
+
+# VIB014: single-letter variables outside loops
+def calculate(n):
+    x = n * 2
+    y = x + 10
+    return y
+
+
+# VIB015: temp/tmp anything — names that were never meant to last
+def build_response():
+    temp = {"status": "ok"}
+    tmp_headers = {"Content-Type": "application/json"}
+    return temp, tmp_headers
+
+
+# VIB016: new_ prefix — implies an old_ that doesn't exist
+def update_user(user):
+    new_user = {**user, "updated": True}
+    new_email = user["email"].lower()
+    return new_user, new_email
+
+
+# VIB017: _2 or _copy suffix — version control in a variable name
+def retry_handler(request):
+    handler_copy = request.handler
+    result_2 = handler_copy()
+    return result_2
+
+
+# VIB018: final in the variable name — the hubris
+def resolve_config(base, overrides):
+    final_config = {**base, **overrides}
+    final_result = final_config.get("value")
+    return final_result
+
+
+# VIB019: flag variable — a boolean that refused to explain itself
+def validate(value):
+    flag = value is not None
+    error_flag = len(str(value)) > 100
+    return flag, error_flag
+
+
+# VIB020: Manager class with no clear purpose
+class DataManager:
+    def handle(self, payload):
+        return payload
+
+
+class UserManager:
+    def get(self, user_id):
+        return user_id

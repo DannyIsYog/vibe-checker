@@ -27,3 +27,7 @@ Good examples:
 Bad examples:
 - `"comparing to True is bad"` — no fix, no reason
 - `"use is None"` — no personality, no context
+
+# The code must vibe-check itself
+
+After every code change, run `vibe-check src/` and confirm the score is 100/100. If it isn't, fix the violations before considering the task done. The source code is not allowed to fail its own linter.

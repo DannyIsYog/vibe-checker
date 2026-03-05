@@ -7,6 +7,16 @@ from flake8_vibes.rules.boolean_chaos import (
     EqualsTrueRule,
     NotEqualsRule,
 )
+from flake8_vibes.rules.naming_crimes import (
+    CopySuffixRule,
+    FinalVariableRule,
+    FlagVariableRule,
+    GodVariableRule,
+    NewPrefixRule,
+    SingleLetterRule,
+    TempVariableRule,
+    VagueClassRule,
+)
 from flake8_vibes.rules.thursday_energy import ThursdayEnergyRule
 from flake8_vibes.rules.todo_shame import TodoShameRule
 
@@ -17,6 +27,14 @@ ALL_RULES: list[type[VibRule]] = [
     EqualsFalseRule,
     EqualsNoneRule,
     NotEqualsRule,
+    GodVariableRule,
+    SingleLetterRule,
+    TempVariableRule,
+    NewPrefixRule,
+    CopySuffixRule,
+    FinalVariableRule,
+    FlagVariableRule,
+    VagueClassRule,
 ]
 
 _codes = [r.code for r in ALL_RULES]

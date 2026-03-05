@@ -7,10 +7,10 @@ from flake8_vibes.rules.boolean_chaos import (
     EqualsNoneRule,
     EqualsTrueRule,
     NotEqualsRule,
-    _MESSAGES_081,
-    _MESSAGES_082,
-    _MESSAGES_083,
-    _MESSAGES_084,
+    _EQUALS_FALSE_MESSAGES,
+    _EQUALS_NONE_MESSAGES,
+    _EQUALS_TRUE_MESSAGES,
+    _NOT_EQUALS_MESSAGES,
     _is_const,
 )
 
@@ -70,7 +70,7 @@ def test_081_error_tuple_format():
 
 
 def test_081_messages_list():
-    assert len(_MESSAGES_081) >= 2
+    assert len(_EQUALS_TRUE_MESSAGES) >= 2
 
 
 # --- VIB082: == False ---
@@ -104,7 +104,7 @@ def test_082_error_tuple_format():
 
 
 def test_082_messages_list():
-    assert len(_MESSAGES_082) >= 2
+    assert len(_EQUALS_FALSE_MESSAGES) >= 2
 
 
 # --- VIB083: == None ---
@@ -144,7 +144,7 @@ def test_083_error_tuple_format():
 
 
 def test_083_messages_list():
-    assert len(_MESSAGES_083) >= 2
+    assert len(_EQUALS_NONE_MESSAGES) >= 2
 
 
 # --- VIB084: not x == y ---
@@ -180,7 +180,7 @@ def test_084_error_tuple_format():
 
 
 def test_084_messages_list():
-    assert len(_MESSAGES_084) >= 2
+    assert len(_NOT_EQUALS_MESSAGES) >= 2
 
 
 # --- _is_const helper ---

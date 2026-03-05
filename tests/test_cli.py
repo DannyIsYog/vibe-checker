@@ -62,12 +62,18 @@ def test_check_file_thursday_violation(tmp_path: Path, monkeypatch: pytest.Monke
     monkeypatch.setattr(
         "flake8_vibes.rules.thursday_energy._is_thursday", lambda _: True
     )
-    body = "\n".join(f"    x_{i} = {i}" for i in range(25))
+    names = [
+        "alpha", "bravo", "charlie", "delta", "echo", "foxtrot", "golf", "hotel",
+        "india", "juliet", "kilo", "lima", "mike", "november", "oscar", "papa",
+        "quebec", "romeo", "sierra", "tango", "uniform", "victor", "whiskey",
+        "xray", "yankee",
+    ]
+    body = "\n".join(f"    {name} = {i}" for i, name in enumerate(names))
     f = tmp_path / "big.py"
     f.write_text(f"def big_fn():\n{body}\n")
     errors = check_file(f)
-    assert len(errors) == 1
-    assert "VIB001" in errors[0][2]
+    vib001_errors = [e for e in errors if "VIB001" in e[2]]
+    assert len(vib001_errors) == 1
 
 
 # --- render_report ---
