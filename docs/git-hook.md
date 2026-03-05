@@ -1,6 +1,6 @@
-# Git Hook: Vibe Check on Every Commit
+# Git Hook: Make Every Commit Know Its Own Score
 
-You can have `vibe-check` append a score to every commit message automatically using a `prepare-commit-msg` hook.
+You can have `vibe-check` append a vibe score to every commit message automatically using a `prepare-commit-msg` hook. Every commit will know what it did. No hiding.
 
 Create `.git/hooks/prepare-commit-msg` in your project:
 
@@ -51,4 +51,4 @@ Then make it executable:
 chmod +x .git/hooks/prepare-commit-msg
 ```
 
-Every commit will now include a vibe score in its message. The hook silently skips if `vibe-check` isn't installed, so it's safe to share setup instructions without making it a hard dependency.
+Every commit will now carry its vibe score in the message. The hook silently skips if `vibe-check` isn't installed, so it won't break anyone's setup. But if you have it, it will watch. It will always watch.

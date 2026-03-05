@@ -1,11 +1,12 @@
-# Commit messages must be on theme with the vibes
+# Commit messages must match the vibes
 
-All commit messages must match the energy of this project. They should feel like they were written by someone who takes code quality seriously but not literally.
+All commit messages must feel like they were written by someone who takes code quality seriously but not literally. The tone is sassy, direct, and a little judgmental — like a senior dev who has seen things and is done being polite about it.
 
 Good examples:
 - `feat(VIB002): call out your TODOs before they call you out`
 - `chore: teach your editor to feel something`
 - `fix: the vibes were off, now they aren't`
+- `feat(VIB033): bare except has been getting away with it for too long`
 
 Bad examples:
 - `add todo shame rule`
@@ -16,11 +17,21 @@ Bad examples:
 
 Every rule must define at least 2 messages and pick between them using `random.choice(messages)`.
 
+Messages must have bite. They should be:
+- Specific to what went wrong, not generic
+- Sassy, a little judgmental, but never mean-spirited
+- Written in lowercase (sentence case is fine, all-caps is not)
+- Short enough to scan, sharp enough to sting
+
+Soft, sanitised messages like "this could be improved" are not acceptable. If the message could appear in a corporate style guide, rewrite it.
+
 # Every new rule needs tests and docs
 
 When adding a new rule:
 1. Add a test file at `tests/rules/test_<rule_name>.py` covering both triggering and non-triggering cases, and edge cases.
 2. Add the rule to `docs/rules.md` with its code, name, what it catches, and an example violation.
+
+The docs should match the tone of the messages — direct, a little sassy, no corporate softening.
 
 # VS Code extension development
 

@@ -6,7 +6,7 @@
 pip install flake8-vibes
 ```
 
-Once installed, Flake8 will pick it up automatically via entry points. No additional configuration required.
+Once installed, Flake8 picks it up automatically via entry points. No configuration required. It just starts having opinions.
 
 ---
 
@@ -16,7 +16,7 @@ Once installed, Flake8 will pick it up automatically via entry points. No additi
 flake8 --select=VIB your_file.py
 ```
 
-Or add to your `setup.cfg` / `pyproject.toml` to always include vibe checks:
+Or add to your `setup.cfg` / `pyproject.toml` to make the vibes a permanent fixture:
 
 ```ini
 [flake8]
@@ -36,18 +36,18 @@ vibe-check ./src
 ### Output
 
 ```
-Vibe Check Report
------------------------------------------
+Scanned 12 file(s)
+Total violations: 3
 
-  VIB001 thursday-energy     0 issues
-  VIB002 todo-shame          2 issues
-  ...
+Violations by rule:
+  VIB002  ## 2
+  VIB015  # 1
 
------------------------------------------
-  Vibe Score: 87 / 100
+Per-file breakdown:
+  src/main.py                              ████████░░   80/100  decent energy
 
-  Verdict: decent energy
------------------------------------------
+Vibe score: 80/100
+Verdict: decent energy
 ```
 
 ### Scoring
@@ -59,3 +59,11 @@ Vibe Check Report
 | 50–69  | concerning    |
 | 25–49  | chaotic       |
 | 0–24   | cooked        |
+
+### Options
+
+| Flag          | Description                                        |
+|---------------|----------------------------------------------------|
+| `--threshold N` | Exit with code 1 if the score is below N. Good for CI gates. |
+| `--quiet`     | Print only the score and verdict. No breakdown.   |
+| `--json`      | Output violations as a JSON array. Pipe-friendly. |

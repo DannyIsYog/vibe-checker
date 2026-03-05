@@ -9,4 +9,6 @@ Install the [Flake8 extension](https://marketplace.visualstudio.com/items?itemNa
 }
 ```
 
-Replace `/path/to/your/python` with the interpreter where `flake8-vibes` is installed (`which python3`). Violations will appear as squiggles inline in the editor.
+Replace `/path/to/your/python` with the interpreter where `flake8-vibes` is installed (`which python3`). Violations will appear as squiggles inline in the editor — every bad variable name, every suppressed exception, every thursday crime, right there in your face while you write it.
+
+No waiting for CI to tell you the vibes are off. You'll know immediately.
