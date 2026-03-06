@@ -5,15 +5,16 @@
 Output demo/demo.gif
 
 Require vibe-check
+Require flake8
 
 Set Shell zsh
-Set FontSize 14
+Set FontSize 13
 Set FontFamily "Andale Mono"
-Set Width 920
-Set Height 520
+Set Width 1100
+Set Height 620
 Set Theme "Catppuccin Mocha"
 Set Padding 24
-Set TypingSpeed 60ms
+Set TypingSpeed 55ms
 Set CursorBlink false
 
 Hide
@@ -22,10 +23,16 @@ Enter
 Sleep 500ms
 Show
 
+Sleep 400ms
+
+Type "flake8 --select=VIB demo/api.py"
 Sleep 500ms
+Enter
+
+Sleep 5s
 
 Type "vibe-check demo/"
-Sleep 400ms
+Sleep 500ms
 Enter
 
 Sleep 6s
