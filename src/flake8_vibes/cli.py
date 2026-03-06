@@ -87,15 +87,36 @@ def build_report(
     )
 
 
-def _render_rules_section(report: VibeReport, color: bool) -> list[str]:
-    if not report.violations_by_rule:
-        return []
-    lines = ["", "Violations by rule:"]
-    for code, count in sorted(report.violations_by_rule.items()):
-        bar = "#" * min(count, 40)
-        colored_code = _color(code, _BOLD + _RED, color)
-        lines.append(f"  {colored_code}  {bar} {count}")
-    return lines
+_DIM = "\033[2m"
+
+
+def _render_one_violation(
+    lineno: int, col: int, message: str, src_lines: list[str], color: bool
+) -> list[str]:
+    code, _, body = message.partition(" ")
+    colored_code = _color(code, _BOLD + _RED, color)
+    out = [f"  {lineno:>4}:{col:<3}  {colored_code}  {body}"]
+    if 0 < lineno <= len(src_lines):
+        snippet = src_lines[lineno - 1].rstrip()
+        out.append(_color(f"         {snippet}", _DIM, color))
+    return out
+
+
+def _render_violations_section(
+    errors_by_file: dict[str, list[VibError]],
+    source_by_file: dict[str, list[str]],
+    color: bool,
+) -> list[str]:
+    output = []
+    for filepath, errors in sorted(errors_by_file.items()):
+        if not errors:
+            continue
+        noun = "violation" if len(errors) == 1 else "violations"
+        output += ["", f"{filepath}  —  {len(errors)} {noun}"]
+        src_lines = source_by_file.get(filepath, [])
+        for lineno, col, message, _ in sorted(errors):
+            output += _render_one_violation(lineno, col, message, src_lines, color)
+    return output
 
 
 def _render_files_section(report: VibeReport, color: bool) -> list[str]:
@@ -114,18 +135,35 @@ def _render_files_section(report: VibeReport, color: bool) -> list[str]:
     return lines
 
 
-def render_report(report: VibeReport, quiet: bool = False, color: bool = False) -> str:
-    lines: list[str] = []
-    if not quiet:
-        lines.append(f"Scanned {report.total_files} file(s)")
-        lines.append(f"Total violations: {report.total_violations}")
-        lines.extend(_render_rules_section(report, color))
-        lines.extend(_render_files_section(report, color))
-        lines.append("")
+def _render_verbose(
+    report: VibeReport,
+    errors_by_file: dict[str, list[VibError]] | None,
+    source_by_file: dict[str, list[str]] | None,
+    color: bool,
+) -> list[str]:
+    lines = [f"Scanned {report.total_files} file(s)", f"Total violations: {report.total_violations}"]
+    if errors_by_file is not None:
+        lines += _render_violations_section(errors_by_file, source_by_file or {}, color)
+    lines += _render_files_section(report, color)
+    lines.append("")
+    return lines
+
+
+def render_report(
+    report: VibeReport,
+    errors_by_file: dict[str, list[VibError]] | None = None,
+    source_by_file: dict[str, list[str]] | None = None,
+    quiet: bool = False,
+    color: bool = False,
+) -> str:
     sc = _score_color(report.score)
-    lines.append(_color(f"Vibe score: {report.score}/100", sc, color))
-    lines.append(_color(f"Verdict: {report.verdict}", sc, color))
-    return "\n".join(lines)
+    tail = [
+        _color(f"Vibe score: {report.score}/100", sc, color),
+        _color(f"Verdict: {report.verdict}", sc, color),
+    ]
+    if quiet:
+        return "\n".join(tail)
+    return "\n".join(_render_verbose(report, errors_by_file, source_by_file, color) + tail)
 
 
 def _format_json(errors_by_file: dict[str, list[VibError]]) -> str:
@@ -176,21 +214,38 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _source_for_files_with_violations(
+    files: list[Path], errors_by_file: dict[str, list[VibError]]
+) -> dict[str, list[str]]:
+    return {
+        str(f): f.read_text(encoding="utf-8").splitlines()
+        for f in files
+        if errors_by_file.get(str(f))
+    }
+
+
+def _print_text_report(
+    args: argparse.Namespace, files: list[Path], errors_by_file: dict[str, list[VibError]]
+) -> VibeReport:
+    source_by_file = _source_for_files_with_violations(files, errors_by_file)
+    report = build_report(errors_by_file, total_files=len(files))
+    sys.stdout.write(
+        render_report(report, errors_by_file, source_by_file, args.quiet, sys.stdout.isatty())
+        + "\n"
+    )
+    return report
+
+
 def main() -> None:
     args = _build_arg_parser().parse_args()
     files = collect_python_files(Path(args.path))
     workers = min(os.cpu_count() or 1, len(files)) if len(files) > 1 else 1
     with ProcessPoolExecutor(max_workers=workers) as pool:
         results = list(pool.map(check_file, files))
-    errors_by_file: dict[str, list[VibError]] = {
-        str(f): r for f, r in zip(files, results)
-    }
+    errors_by_file: dict[str, list[VibError]] = {str(f): r for f, r in zip(files, results)}
     if args.json:
         sys.stdout.write(_format_json(errors_by_file) + "\n")
         return
-    report = build_report(errors_by_file, total_files=len(files))
-    sys.stdout.write(
-        render_report(report, quiet=args.quiet, color=sys.stdout.isatty()) + "\n"
-    )
+    report = _print_text_report(args, files, errors_by_file)
     if report.score < args.threshold:
         raise SystemExit(1)

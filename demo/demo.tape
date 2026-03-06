@@ -11,7 +11,7 @@ Set Shell zsh
 Set FontSize 13
 Set FontFamily "Andale Mono"
 Set Width 1100
-Set Height 620
+Set Height 800
 Set Theme "Catppuccin Mocha"
 Set Padding 24
 Set TypingSpeed 55ms
@@ -35,4 +35,4 @@ Type "vibe-check demo/"
 Sleep 500ms
 Enter
 
-Sleep 6s
+Sleep 8s

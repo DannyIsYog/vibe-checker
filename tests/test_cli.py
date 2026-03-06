@@ -105,9 +105,34 @@ def test_render_report_default():
     report = VibeReport(violations_by_rule={"VIB001": 3}, total_files=5)
     output = render_report(report)
     assert "Scanned 5 file(s)" in output
-    assert "VIB001" in output
     assert "Vibe score:" in output
     assert "Verdict:" in output
+
+
+def test_render_report_violations_section():
+    report = VibeReport(violations_by_rule={"VIB002": 1}, total_files=1)
+    errors_by_file = {
+        "src/main.py": [
+            (10, 4, "VIB002 todo shame: you wrote TODO and kept moving.", type)
+        ]
+    }
+    source_by_file = {"src/main.py": [""] * 9 + ["    x = 1  # TODO: fix this"]}
+    output = render_report(
+        report, errors_by_file=errors_by_file, source_by_file=source_by_file
+    )
+    assert "src/main.py" in output
+    assert "VIB002" in output
+    assert "you wrote TODO and kept moving." in output
+    assert "1 violation" in output
+    assert "# TODO: fix this" in output
+
+
+def test_render_report_violations_hidden_for_clean_files():
+    report = VibeReport(violations_by_rule={}, total_files=2)
+    errors_by_file = {"src/clean.py": [], "src/also_clean.py": []}
+    output = render_report(report, errors_by_file=errors_by_file)
+    assert "src/clean.py  —" not in output
+    assert "src/also_clean.py  —" not in output
 
 
 def test_render_report_quiet():
@@ -118,10 +143,26 @@ def test_render_report_quiet():
     assert "Verdict:" in output
 
 
-def test_render_report_bar_chart():
-    report = VibeReport(violations_by_rule={"VIB001": 5}, total_files=1)
-    output = render_report(report)
-    assert "#####" in output
+def test_render_report_violation_line_format():
+    report = VibeReport(violations_by_rule={"VIB013": 1}, total_files=1)
+    errors_by_file = {
+        "src/models.py": [
+            (
+                7,
+                8,
+                "VIB013 naming crime: `result` holds everything and describes nothing.",
+                type,
+            )
+        ]
+    }
+    source_by_file = {"src/models.py": [""] * 6 + ["        result = get_data()"]}
+    output = render_report(
+        report, errors_by_file=errors_by_file, source_by_file=source_by_file
+    )
+    assert "7:" in output
+    assert "VIB013" in output
+    assert "`result` holds everything and describes nothing." in output
+    assert "result = get_data()" in output
 
 
 def test_render_report_color_enabled():

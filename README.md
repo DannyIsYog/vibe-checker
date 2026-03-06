@@ -195,6 +195,10 @@ vibe-check ./src
 response_data = fetch()  # noqa: VIB013
 ```
 
+**VS Code — inline squiggles and hover messages while you type:**
+
+![VS Code extension demo](demo/vscode.gif)
+
 ## Contributing
 
 You want all-green CI and the satisfaction of telling people you contribute to a linter. Valid. Here's the fastest way in.
