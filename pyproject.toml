@@ -8,7 +8,14 @@ version = "0.1.2"
 description = "A flake8 plugin that checks your code's vibes, not just its syntax."
 readme = "README.md"
 requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "DannyIsYog" }]
 dependencies = ["flake8>=6.0.0"]
+
+[project.urls]
+Homepage = "https://github.com/DannyIsYog/vibe-checker"
+Repository = "https://github.com/DannyIsYog/vibe-checker"
+"Bug Tracker" = "https://github.com/DannyIsYog/vibe-checker/issues"
 
 [project.optional-dependencies]
 dev = ["black", "isort", "mypy", "ruff", "pytest", "pytest-cov"]

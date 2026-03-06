@@ -2,7 +2,7 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/flake8-vibes.svg)](https://pypi.org/project/flake8-vibes/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Vibe Check: Passing](https://img.shields.io/badge/vibe%20check-passing-brightgreen)](https://github.com/your-org/flake8-vibes)
+[![Vibe Check: Passing](https://img.shields.io/badge/vibe%20check-passing-brightgreen)](https://github.com/DannyIsYog/vibe-checker)
 
 > A Flake8 plugin for the emotional and spiritual correctness of your Python code.
 
@@ -221,6 +221,7 @@ Want to go deeper — new rules, fixes, changes to how the plugin works? That's 
 - [Git hook setup](docs/git-hook.md)
 - [VS Code extension](docs/vscode.md)
 - [Contributing](CONTRIBUTING.md)
+- [Changelog](CHANGELOG.md)
 
 ---
 

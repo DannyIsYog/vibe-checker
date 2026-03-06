@@ -90,7 +90,7 @@ All of the above must pass before a PR is merged. No exceptions.
 ```toml
 [tool.black]
 line-length = 88
-target-version = ["py38"]
+target-version = ["py39"]
 
 [tool.isort]
 profile = "black"
@@ -98,10 +98,12 @@ known_first_party = ["flake8_vibes"]
 
 [tool.mypy]
 strict = true
-python_version = "3.8"
+python_version = "3.9"
 
 [tool.ruff]
 line-length = 88
+
+[tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "PT"]
 
 [tool.pytest.ini_options]
