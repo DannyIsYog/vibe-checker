@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.3 — 2026-03-06
+
+- `vibe-check` now shows the offending source line under each violation
+- Fixed README: 33 rules → 87 rules, VIB041 mislabelled as bare-except (it's magic-number)
+- Fixed `docs/usage.md`: phantom "violations by rule" section removed, full scoring verdicts documented, added `--quiet` and `--json` output examples, added `# noqa` suppression docs
+
 ## 0.1.2 — 2026-03-06
 
 - Fixed VIB053 compatibility with mypy strict mode

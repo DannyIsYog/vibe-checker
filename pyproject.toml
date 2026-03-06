@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "flake8-vibes"
-version = "0.1.2"
+version = "0.1.3"
 description = "A flake8 plugin that checks your code's vibes, not just its syntax."
 readme = "README.md"
 requires-python = ">=3.9"
