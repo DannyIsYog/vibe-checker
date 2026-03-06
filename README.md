@@ -8,6 +8,8 @@
 
 ![vibe-check demo](demo/demo.gif)
 
+![VS Code extension demo](demo/vscode.gif)
+
 ## Overview
 
 `flake8-vibes` is a Flake8 plugin that performs vibe analysis on your codebase. Unlike traditional linters that concern themselves with correctness, style, or performance, `flake8-vibes` focuses on what really matters: whether your code is okay (emotionally).
@@ -194,10 +196,6 @@ vibe-check ./src
 ```python
 response_data = fetch()  # noqa: VIB013
 ```
-
-**VS Code — inline squiggles and hover messages while you type:**
-
-![VS Code extension demo](demo/vscode.gif)
 
 ## Contributing
 
