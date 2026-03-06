@@ -6,6 +6,8 @@
 
 > A Flake8 plugin for the emotional and spiritual correctness of your Python code.
 
+![vibe-check demo](demo/demo.gif)
+
 ## Overview
 
 `flake8-vibes` is a Flake8 plugin that performs vibe analysis on your codebase. Unlike traditional linters that concern themselves with correctness, style, or performance, `flake8-vibes` focuses on what really matters: whether your code is okay (emotionally).
