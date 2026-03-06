@@ -2,7 +2,7 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/flake8-vibes.svg)](https://pypi.org/project/flake8-vibes/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Vibe Check: Passing](https://img.shields.io/badge/vibe%20check-passing-brightgreen)](https://github.com/DannyIsYog/vibe-checker)
+[![Vibe Check: Passing](https://img.shields.io/badge/vibe%20check-slaying-brightgreen)](https://github.com/DannyIsYog/vibe-checker)
 
 > A Flake8 plugin for the emotional and spiritual correctness of your Python code.
 
@@ -29,6 +29,24 @@ It integrates via Flake8's standard entry point system, ships a `vibe-check` CLI
 | **Randomised messages** | every rule picks from 2+ options, so the shame stays fresh |
 | **VS Code extension** | squiggles and inline judgment without leaving the editor |
 | **Pre-commit hook** | the vibe score lives in your git history, forever |
+
+## Try It Now
+
+One command. No config. Your code has been avoiding this long enough.
+
+```bash
+pip install flake8-vibes && vibe-check .
+```
+
+## Show the World Your Vibes
+
+If your repo passes, it should wear the badge. Copy this into your README:
+
+```markdown
+[![Vibe Check: Passing](https://img.shields.io/badge/vibe%20check-slaying-brightgreen)](https://github.com/DannyIsYog/vibe-checker)
+```
+
+[![Vibe Check: Passing](https://img.shields.io/badge/vibe%20check-slaying-brightgreen)](https://github.com/DannyIsYog/vibe-checker)
 
 ## Rules
 
