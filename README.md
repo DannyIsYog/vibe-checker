@@ -144,7 +144,7 @@ We ran `vibe-check` across 12 of the most beloved Python repos. No one was ready
 | [requests](https://github.com/psf/requests) | 18 | 413 | 0/100 | it's giving dumpster fire |
 | [rich](https://github.com/Textualize/rich) | 100 | 1,552 | 22/100 | cooked |
 
-Django is the only one that cleared 50. Ruff lints everything except, apparently, itself. Pandas has 56,653 violations, which tracks.
+Django and Ruff are the only ones that cleared 50. Ruff lints everything except, apparently, itself. Pandas has 56,653 violations, which tracks.
 
 → [Full report](reports/report.md)
 
