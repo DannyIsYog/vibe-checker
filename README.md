@@ -22,7 +22,7 @@ It integrates via Flake8's standard entry point system, ships a `vibe-check` CLI
 
 | Feature | Vibe |
 |---|---|
-| **33 rules, 8 categories** | naming crimes, boolean chaos, exception dishonesty, complexity, hardcoding, docstring energy, temporal risk |
+| **87 rules, 17 categories** | naming crimes, boolean chaos, exception dishonesty, complexity, hardcoding, docstring energy, temporal risk, and more |
 | **Git-aware** | `git blame` tells VIB001 exactly who wrote that function on a Thursday |
 | **`vibe-check` CLI** | per-file scores, verdicts, and a final reckoning |
 | **Standard Flake8** | `flake8 --select=VIB` — works with your existing config and CI |
@@ -69,10 +69,10 @@ FIXME: acknowledged, unaddressed, unforgiven, and now publicly humiliated
 
 ---
 
-**`VIB041` bare-except** — `except:` with no type catches everything, including `KeyboardInterrupt` and your dignity.
+**`VIB041` magic-number** — a bare integer in a comparison tells you the value, not the meaning. `>= 5` means nothing. `>= MAX_RETRIES` means everything.
 
 ```
-you caught everything. you handled nothing. bold move.
+magic number 5: a constant that knows its value but not its purpose.
 ```
 
 ---
