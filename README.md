@@ -193,6 +193,27 @@ vibe-check ./src
 response_data = fetch()  # noqa: VIB013
 ```
 
+## Contributing
+
+You want all-green CI and the satisfaction of telling people you contribute to a linter. Valid. Here's the fastest way in.
+
+The lowest-lift contribution is adding messages to an existing rule. Every rule picks from a list at random — more messages means more variety, less déjà vu, and more ways to make someone stare at their screen and reconsider their variable names.
+
+Find the rule file in `src/flake8_vibes/rules/`, locate the `_MESSAGES` list, drop in a string, open a PR. The message needs to be lowercase, specific to the violation, and have actual opinions. "this could be improved" is not a message. It's a LinkedIn comment. Rewrite it.
+
+```python
+# src/flake8_vibes/rules/boolean_chaos.py
+_EQUALS_TRUE_MESSAGES = [
+    "comparing to `True` explicitly is a trust issue with your own type system and honestly? it shows.",
+    "`== True` — you already have a boolean. what are you waiting for. use it.",
+    # yours goes here. make it count.
+]
+```
+
+No new files. No registration. No tests to write. Just a string with a spine.
+
+Want to go deeper — new rules, fixes, changes to how the plugin works? That's in [CONTRIBUTING.md](CONTRIBUTING.md). It has opinions too.
+
 ## Documentation
 
 - [Usage & installation](docs/usage.md)

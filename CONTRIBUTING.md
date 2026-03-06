@@ -12,6 +12,7 @@ This document defines the standards for all code in this repository. The project
 - [Type Annotations](#type-annotations)
 - [Naming Conventions](#naming-conventions)
 - [Testing](#testing)
+- [Adding messages to an existing rule](#adding-messages-to-an-existing-rule)
 - [Adding a New Rule](#adding-a-new-rule)
 - [Documentation](#documentation)
 - [Git Conventions](#git-conventions)
@@ -275,6 +276,31 @@ Integration tests (via the Flake8 API) live in `tests/test_plugin.py` and test t
 - `test_flags_<condition>` for tests that expect a violation
 - `test_does_not_flag_<condition>` for tests that expect no violation
 - `test_<thing>_with_<config_option>` for configuration variants
+
+---
+
+## Adding messages to an existing rule
+
+This is the lowest-friction contribution and the fastest way to get a merged PR with your name on it. Start here.
+
+Every rule holds its violation messages in a module-level list (named something like `_YOUR_RULE_MESSAGES`). The rule picks one at random on each violation. Adding to that list is all it takes to ship something real.
+
+**The message must:**
+
+- Be lowercase. Sentence case is fine; all-caps is a cry for help.
+- Be specific to the violation — if it could apply to anything, it applies to nothing.
+- Have actual opinions. "this could be improved" is not a message, it's a performance review comment. Rewrite it.
+- Be short enough to read in a terminal. Punchy. No essays.
+
+**How to do it:**
+
+1. Find the rule file in `src/flake8_vibes/rules/`
+2. Locate the `_MESSAGES` list (or `_YOUR_RULE_MESSAGES`, etc.)
+3. Add your string to the list
+4. Run `pytest tests/rules/test_<rule_name>.py` to confirm nothing broke
+5. Run `vibe-check src/` and confirm it's still 100/100
+
+No new files. No registration. No test file changes required unless you're adding edge cases (encouraged, not mandatory for a message-only change). Open the PR, get the greens.
 
 ---
 
