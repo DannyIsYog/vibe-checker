@@ -141,7 +141,10 @@ def _render_verbose(
     source_by_file: dict[str, list[str]] | None,
     color: bool,
 ) -> list[str]:
-    lines = [f"Scanned {report.total_files} file(s)", f"Total violations: {report.total_violations}"]
+    lines = [
+        f"Scanned {report.total_files} file(s)",
+        f"Total violations: {report.total_violations}",
+    ]
     if errors_by_file is not None:
         lines += _render_violations_section(errors_by_file, source_by_file or {}, color)
     lines += _render_files_section(report, color)
@@ -163,7 +166,9 @@ def render_report(
     ]
     if quiet:
         return "\n".join(tail)
-    return "\n".join(_render_verbose(report, errors_by_file, source_by_file, color) + tail)
+    return "\n".join(
+        _render_verbose(report, errors_by_file, source_by_file, color) + tail
+    )
 
 
 def _format_json(errors_by_file: dict[str, list[VibError]]) -> str:
@@ -225,12 +230,16 @@ def _source_for_files_with_violations(
 
 
 def _print_text_report(
-    args: argparse.Namespace, files: list[Path], errors_by_file: dict[str, list[VibError]]
+    args: argparse.Namespace,
+    files: list[Path],
+    errors_by_file: dict[str, list[VibError]],
 ) -> VibeReport:
     source_by_file = _source_for_files_with_violations(files, errors_by_file)
     report = build_report(errors_by_file, total_files=len(files))
     sys.stdout.write(
-        render_report(report, errors_by_file, source_by_file, args.quiet, sys.stdout.isatty())
+        render_report(
+            report, errors_by_file, source_by_file, args.quiet, sys.stdout.isatty()
+        )
         + "\n"
     )
     return report
@@ -242,7 +251,9 @@ def main() -> None:
     workers = min(os.cpu_count() or 1, len(files)) if len(files) > 1 else 1
     with ProcessPoolExecutor(max_workers=workers) as pool:
         results = list(pool.map(check_file, files))
-    errors_by_file: dict[str, list[VibError]] = {str(f): r for f, r in zip(files, results)}
+    errors_by_file: dict[str, list[VibError]] = {
+        str(f): r for f, r in zip(files, results)
+    }
     if args.json:
         sys.stdout.write(_format_json(errors_by_file) + "\n")
         return
